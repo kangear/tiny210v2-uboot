@@ -1,0 +1,30 @@
+bootcmd_setup=
+bootcmd_pxe=setenv bootfile "" ;dhcp; pxe get; pxe boot
+bootcmd_disk_scr=ext2load ${boot_ifc} ${bootdevice} ${scr_addr_r} boot.scr && source ${scr_addr_r}
+bootcmd_disk_sysboot1=setenv bootfile /boot/extlinux/extlinux.conf; sysboot ${boot_ifc} ${bootdevice} ext2
+bootcmd_disk_sysboot2=setenv bootfile /extlinux/extlinux.conf; sysboot ${boot_ifc} ${bootdevice} ext2
+bootcmd_disk_uenv=ext2load ${boot_ifc} ${bootdevice} ${uenv_addr_r} uEnv.txt; env import -t ${uenv_addr_r} ${filesize}; run bootcmd_uenv
+bootcmd_disk_kernel=ext2load ${boot_ifc} ${bootdevice} ${kernel_addr_r} vmlinuz && ext2load ${boot_ifc} ${bootdevice} ${ramdisk_addr_r} initrd.img && bootz ${kernel_addr_r} ${ramdisk_addr_r}:${filesize} ${fdt_addr}
+bootcmd_disk=run bootcmd_disk_sysboot1; run bootcmd_disk_sysboot2; run bootcmd_disk_uenv; run bootcmd_disk_scr; run bootcmd_disk_kernel
+bootcmd_sata=setenv boot_ifc scsi; scsi scan && run bootcmd_disk
+bootcmd_mmc=setenv boot_ifc mmc; mmc rescan && run bootcmd_disk
+bootcmd_default=run bootcmd_sata; run bootcmd_pxe
+bootcmd0=run bootcmd_setup; run bootcmd_default
+bootcmd1=run bootcmd_setup; run bootcmd_pxe
+bootcmd2=run bootcmd_setup; run bootcmd_sata
+bootcmd15=run bootcmd_setup; run bootcmd_mmc
+localcmd=run bootcmd_sata
+bootdevice=0
+bootargs=console=ttyAMA0 root=LABEL=rootfs nosplash
+bootdelay=2
+bootretry=90
+netretry=once
+fdt_addr=0x1000
+fdt_high=0xffffffff
+pxefile_addr_r=0x700000
+kernel_addr_r=0x800000
+ramdisk_addr_r=0x01000000
+initrd_high=0xffffffff
+scr_addr_r=0x100000
+uenv_addr_r=0x600000
+
