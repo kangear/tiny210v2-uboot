@@ -53,6 +53,7 @@
 #include <post.h>
 #include <logbuff.h>
 
+
 #ifdef CONFIG_BITBANGMII
 #include <miiphy.h>
 #endif
@@ -108,6 +109,7 @@ void blue_led_off(void) __attribute__((weak, alias("__blue_led_off")));
 #if defined(CONFIG_ARM_DCC) && !defined(CONFIG_BAUDRATE)
 #define CONFIG_BAUDRATE 115200
 #endif
+
 
 static int init_baudrate(void)
 {

@@ -183,7 +183,152 @@ call_board_init_f:
 	ldr	sp, =(CONFIG_SYS_INIT_SP_ADDR)
 	bic	sp, sp, #7 /* 8-byte alignment for ABI compliance */
 	ldr	r0,=0x00000000
+#if defined(CONFIG_TINY210) || defined(CONFIG_MINI210)
+//判断启动方式
+#define PRO_ID_BASE			0xE0000000
+#define PRO_ID_OFFSET			0x00
+#define OMR_OFFSET			0x04
+
+#define BOOT_ONENAND		0x1
+#define BOOT_NAND		0x2
+#define BOOT_MMCSD		0x3
+#define BOOT_NOR		0x4
+#define BOOT_SEC_DEV		0x5
+
+#define INF_REG_BASE			0xE010F000
+#define INF_REG3_OFFSET			0x0c
+
+	adr	r4, _start
+	ldr	r5,_TEXT_BASE
+	cmp     r5,r4
+	beq	board_init_in_ram
+
+	ldr	r0, =PRO_ID_BASE
+    ldr	r1, [r0,#OMR_OFFSET]
+    bic	r2, r1, #0xffffffc1
+
+	/* NAND BOOT */
+	cmp	r2, #0x0		@ 512B 4-cycle
+	moveq	r3, #BOOT_NAND
+
+	cmp	r2, #0x2		@ 2KB 5-cycle
+	moveq	r3, #BOOT_NAND
+
+	cmp	r2, #0x4		@ 4KB 5-cycle	8-bit ECC
+	moveq	r3, #BOOT_NAND
+
+	cmp	r2, #0x6		@ 4KB 5-cycle	16-bit ECC
+	moveq	r3, #BOOT_NAND
+
+	cmp	r2, #0x8		@ OneNAND Mux
+	moveq	r3, #BOOT_ONENAND
+
+	/* SD/MMC BOOT */
+	cmp     r2, #0xc
+	moveq   r3, #BOOT_MMCSD
+
+	/* NOR BOOT */
+	cmp     r2, #0x14
+	moveq   r3, #BOOT_NOR
+
+	/* Uart BOOTONG failed */
+	cmp     r2, #(0x1<<4)
+	moveq   r3, #BOOT_SEC_DEV
+
+	ldr	r0, =INF_REG_BASE
+	str	r3, [r0, #INF_REG3_OFFSET]
+
+	ldr	r1, [r0, #INF_REG3_OFFSET]
+	cmp	r1, #BOOT_NAND		/* 0x0 => boot device is nand */
+	beq	nand_boot_210
+	cmp     r1, #BOOT_MMCSD
+	beq     mmcsd_boot_210
+
+nand_boot_210:
+//  nand_cp.c
+	bl	   nand_asm_init2
+	bl     board_init_f_nand
+
+mmcsd_boot_210:
+//  mmc_cp.c
+	bl     board_init_f_mmc
+
+board_init_in_ram:
+#endif
+//  board.c
 	bl	board_init_f
+
+
+nand_asm_init2:
+
+/*
+ * Nand Interface Init for SMDKC110
+ */
+
+#define ELFIN_GPIO_BASE			0xE0200000
+#define ELFIN_NAND_BASE			0xB0E00000
+#define NFCONF_VAL	    (2<<23)|(7<<12)|(7<<8)|(7<<4)|(1<<3)|(0<<2)|(1<<1)|(0<<0)
+#define NFCONT_VAL      (0x1<<23)|(0x1<<22)|(0<<18)|(0<<17)|(0<<16)|(0<<10)|(0<<9)|(0<<8)|(0<<7)|(0<<6)|(0x2<<1)|(1<<0)
+
+//#define  NFCONF_VAL     (0<<25)|(0x3<<23)|(7<<12)|(7<<8)|(7<<4)|(1<<3)|(0<<2)|(1<<1)|(0<<0)
+//#define NFCONT_VAL      (0x1<<23)|(0x1<<22)|(0<<18)|(0<<17)|(0<<16)|(0<<10)|(0<<9)|(0<<8)|(0<<7)|(0<<6)|(1<<5)|(0x2<<1)|(1<<0)
+
+#define MP01CON_OFFSET 			0x2E0
+#define MP01PUD_OFFSET 			0x2E8
+#define MP03CON_OFFSET      0x320
+#define MP03PUD_OFFSET      0x328
+#define NFCONF_OFFSET       0x00
+#define NFCONT_OFFSET       0x04
+
+
+	ldr	r0, =ELFIN_GPIO_BASE
+
+	ldr	r1, [r0, #MP01CON_OFFSET]
+	bic	r1, r1, #(0xf<<8)
+	orr	r1, r1, #(0x3<<8)
+	str	r1, [r0, #MP01CON_OFFSET]
+
+	ldr	r1, [r0, #MP01PUD_OFFSET]
+	bic	r1, r1, #(0x3<<4)
+	str	r1, [r0, #MP01PUD_OFFSET]
+
+	ldr	r1, [r0, #MP03CON_OFFSET]
+	bic	r1, r1, #0xFFFFFF
+	ldr	r2, =0x22222222
+	orr	r1, r1, r2
+	str	r1, [r0, #MP03CON_OFFSET]
+
+	ldr	r1, [r0, #MP03PUD_OFFSET]
+	ldr	r2, =0x3fff
+	bic	r1, r1, r2
+	str	r1, [r0, #MP03PUD_OFFSET]
+
+	ldr	r0, =ELFIN_NAND_BASE
+
+	ldr	r1, [r0, #NFCONF_OFFSET]
+	ldr	r2, =0x777F
+	bic	r1, r1, r2
+	ldr	r2, =NFCONF_VAL
+	orr	r1, r1, r2
+	str	r1, [r0, #NFCONF_OFFSET]
+
+	ldr	r1, [r0, #NFCONT_OFFSET]
+	ldr	r2, =0x707C7
+	bic	r1, r1, r2
+	ldr	r2, =NFCONT_VAL
+	orr	r1, r1, r2
+	str	r1, [r0, #NFCONT_OFFSET]
+
+	ldr	r1, [r0, #NFCONF_OFFSET]
+	orr	r1, r1, #0x70
+	orr	r1, r1, #0x7700
+	str     r1, [r0, #NFCONF_OFFSET]
+
+	ldr	r1, [r0, #NFCONT_OFFSET]
+	orr	r1, r1, #0x03
+	str     r1, [r0, #NFCONT_OFFSET]
+
+	mov	pc, lr
 
 /*------------------------------------------------------------------------------*/
 

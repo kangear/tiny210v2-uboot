@@ -256,7 +256,7 @@ int board_eth_init(bd_t *bis)
 #ifdef CONFIG_DISPLAY_BOARDINFO
 int checkboard(void)
 {
-	printf("\nBoard:   FriendlyLEG-TINY210\n");
+	printf("\nBoard:   FriendlyARM-TINY210\n");
 	return (0);
 }
 #endif

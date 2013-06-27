@@ -33,6 +33,9 @@ SOBJS	+= reset.o
 
 COBJS	+= clock.o
 
+COBJS  += mmc_cp.o
+COBJS  += nand_cp.o
+
 SRCS	:= $(SOBJS:.o=.S) $(COBJS:.o=.c)
 OBJS	:= $(addprefix $(obj),$(COBJS) $(SOBJS))
 

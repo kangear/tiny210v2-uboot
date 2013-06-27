@@ -131,7 +131,7 @@
 #define CONFIG_SYS_LONGHELP             /* undef to save memory */
 #define CONFIG_SYS_HUSH_PARSER          /* use "hush" command parser    */
 #define CONFIG_SYS_PROMPT_HUSH_PS2      "> "
-#define CONFIG_SYS_PROMPT              "[FriendlyLEG-TINY210]# "
+#define CONFIG_SYS_PROMPT              "[Ver130626-TINY210v2]# "
 #define CONFIG_SYS_CBSIZE               256     /* Console I/O Buffer Size*/
 #define CONFIG_SYS_PBSIZE               384     /* Print Buffer Size */
 #define CONFIG_SYS_MAXARGS              64      /* max number of command args */
@@ -171,7 +171,7 @@
 /* FLASH and environment organization */
 #define CONFIG_SYS_NO_FLASH		1
 #undef CONFIG_CMD_IMLS
-#define CONFIG_IDENT_STRING	" for FriendlyLEG-TINY210"
+#define CONFIG_IDENT_STRING	" for TINY210(Nand:K9GAG08U0F)"
 
 #define CONFIG_ENV_IS_IN_MMC		1
 #define CONFIG_SYS_MMC_ENV_DEV		0
@@ -315,7 +315,11 @@
 
 #define DMC0_MEMCONTROL		0x00202400	// MemControl	BL=4, 1Chip, DDR2 Type, dynamic self refresh, force precharge, dynamic power down off
 #define DMC0_MEMCONFIG_0	0x20E00323	// MemConfig0	256MB config, 8 banks,Mapping Method[12:15]0:linear, 1:linterleaved, 2:Mixed
+#if 0
 #define DMC0_MEMCONFIG_1	0x00E00323	// MemConfig1
+#else
+#define DMC0_MEMCONFIG_1	0x20E00323	// MemConfig1
+#endif
 #if 0
 #define DMC0_TIMINGA_REF	0x00000618	// TimingAref	7.8us*133MHz=1038(0x40E), 100MHz=780(0x30C), 20MHz=156(0x9C), 10MHz=78(0x4E)
 #define DMC0_TIMING_ROW		0x28233287	// TimingRow	for @200MHz
@@ -422,6 +426,10 @@
 #define CONFIG_SERVERIP		192.168.186.13
 #define CONFIG_GATEWAYIP	192.168.0.1
 
+
+/*add by kangear
+#define CONFIG_NAND 1
+ */
 /*   For nand driver   */
 #define CONFIG_CMD_NAND
 #if defined(CONFIG_CMD_NAND)
