@@ -604,7 +604,8 @@ $(obj)u-boot-nand.bin:	nand_spl $(obj)u-boot.bin
 		cat $(obj)nand_spl/u-boot-spl-16k.bin $(obj)u-boot.bin > $(obj)u-boot-nand.bin
 
 $(obj)spl/u-boot-spl.bin:	$(SUBDIR_TOOLS) depend
-		$(MAKE) -C spl all
+		#$(MAKE) -C spl all
+		$(MAKE) -C BL1 all
 
 updater:
 		$(MAKE) -C tools/updater all
@@ -883,7 +884,7 @@ distclean:	clobber unconfig
 ifneq ($(OBJTREE),$(SRCTREE))
 	rm -rf $(obj)*
 endif
-
+	make distclean -C BL1
 backup:
 	F=`basename $(TOPDIR)` ; cd .. ; \
 	gtar --force-local -zcvf `LC_ALL=C date "+$$F-%Y-%m-%d-%T.tar.gz"` $$F

@@ -115,6 +115,9 @@
 /* Command definition*/
 #include <config_cmd_default.h>
 
+#define CONFIG_CMDLINE_EDITNG
+#define CONFIG_AUTO_COMPLETE
+
 #define CONFIG_CMD_PING
 #define CONFIG_CMD_ELF
 #define CONFIG_CMD_DHCP
@@ -131,7 +134,7 @@
 #define CONFIG_SYS_LONGHELP             /* undef to save memory */
 #define CONFIG_SYS_HUSH_PARSER          /* use "hush" command parser    */
 #define CONFIG_SYS_PROMPT_HUSH_PS2      "> "
-#define CONFIG_SYS_PROMPT              "[Ver130626-TINY210v2]# "
+#define CONFIG_SYS_PROMPT              "[Ver130720-TINY210v2]# "
 #define CONFIG_SYS_CBSIZE               256     /* Console I/O Buffer Size*/
 #define CONFIG_SYS_PBSIZE               384     /* Print Buffer Size */
 #define CONFIG_SYS_MAXARGS              64      /* max number of command args */
@@ -422,9 +425,9 @@
 /***Modified by lk ***/
 #define CONFIG_ETHADDR		00:40:5c:26:0a:5b
 #define CONFIG_NETMASK          255.255.255.0
-#define CONFIG_IPADDR		192.168.186.13
-#define CONFIG_SERVERIP		192.168.186.13
-#define CONFIG_GATEWAYIP	192.168.0.1
+#define CONFIG_IPADDR		192.168.1.230
+#define CONFIG_SERVERIP		192.168.1.229
+#define CONFIG_GATEWAYIP	192.168.1.1
 
 
 /*add by kangear
