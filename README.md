@@ -43,7 +43,7 @@
 			Loading Kernel Image ... OK
 		OK
 		Using machid 0xd8a from environment
-
+		
 		Starting kernel ...
 
 		Uncompressing Linux... done, booting the kernel.
