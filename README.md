@@ -1,4 +1,75 @@
-##2013-07-26 支持go命令引导内核
+##2013-07-27 支持tftp下载内核nfs挂载根文件系统
+###
+		step1: setenv machid 0xd8a
+		step2: setenv bootargs root=/dev/nfs nfsroot=192.168.1.229:/work/rootfs_dir/nfs_rootfs/rootfs_qtopia_qt4 ip=192.168.1.230:192.168.1.229:192.168.1.1:255.255.255.0::eth0:off console=ttySAC0,115200 mem=512M
+		step3: tftp uImage_308
+		step4: bootm 21000000
+说明: 
+> 
+ - 0xd8a是tiny210v2内核用的机器码
+> 
+ - bootargs中的路径和ip与你实际情况更改
+> 
+ - rootfs_qtopia_qt4是rootfs_qtopia_qt4-20130222.tar.gz通过命令行解压得来的 
+> 
+ - uImage_308是友善光盘中的3.08内核make uImage得来的
+> 
+###
+		[Ver130726-TINY210v2]# tftp uImage_308
+		dm9000 i/o: 0x88001000, id: 0x90000a46 
+		DM9000: running in 16 bit mode
+		MAC: 00:40:5c:26:0a:5b
+		operating at 100M full duplex mode
+		Using dm9000 device
+		TFTP from server 192.168.1.229; our IP address is 192.168.1.230
+		Filename 'uImage_308'.
+		Load address: 0x21000000
+		Loading: #################################################################
+         ###################################T ##############################
+         #################################################################
+         #################################################################
+         #################################################################
+         ###
+		done
+		Bytes transferred = 4811624 (496b68 hex)
+		[Ver130726-TINY210v2]# bootm  
+		## Booting kernel from Legacy Image at 21000000 ...
+			Image Name:   Linux-3.0.8-FriendlyARM
+			Image Type:   ARM Linux Kernel Image (uncompressed)
+			Data Size:    4811560 Bytes = 4.6 MiB
+			Load Address: 20008000
+			Entry Point:  20008000
+			Verifying Checksum ... OK
+			Loading Kernel Image ... OK
+		OK
+		Using machid 0xd8a from environment
+
+		Starting kernel ...
+
+		Uncompressing Linux... done, booting the kernel.
+		[    0.000000] Initializing cgroup subsys cpu
+		[    0.000000] Linux version 3.0.8-FriendlyARM (root@kangear) (gcc version 4.5.1 (ctng-1.8.1-FA) ) #1 PREEMPT Fri Jul 26 22:26:05 CST 2013
+		[    0.000000] CPU: ARMv7 Processor [412fc082] revision 2 (ARMv7), cr=10c53c7f
+		[    0.000000] CPU: VIPT nonaliasing data cache, VIPT aliasing instruction cache
+		[    0.000000] Machine: MINI210
+		[    0.000000] Memory policy: ECC disabled, Data cache writeback
+		.........
+		.........
+		[   12.274252] libertas_sdio: Unknown symbol lbs_resume (err 0)
+		[   12.332482] libertas_sdio: Libertas SDIO driver
+		[   12.332536] libertas_sdio: Copyright Pierre Ossman
+		Try to bring eth0 interface up......NFS root ...Done
+
+		Please press Enter to activate this console. 
+		[root@FriendlyARM /]# ls
+		bin      etc      linuxrc  proc     sdcard   usr
+		data     home     mnt      root     sys      var
+		dev      lib      opt      sbin     tmp      www
+		[root@FriendlyARM /]# 
+
+
+
+2013-07-26 支持go命令引导内核
 ###
 		BL1 Ver:1307020
 		Start cp 
