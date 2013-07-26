@@ -3,7 +3,7 @@
 		step1: setenv machid 0xd8a
 		step2: setenv bootargs root=/dev/nfs nfsroot=192.168.1.229:/work/rootfs_dir/nfs_rootfs/rootfs_qtopia_qt4 ip=192.168.1.230:192.168.1.229:192.168.1.1:255.255.255.0::eth0:off console=ttySAC0,115200 mem=512M
 		step3: tftp uImage_308
-		step4: bootm 21000000
+		step4: bootm 
 说明: 
 > 
  - 0xd8a是tiny210v2内核用的机器码
