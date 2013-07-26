@@ -45,7 +45,7 @@
 		Using machid 0xd8a from environment
 		
 		Starting kernel ...
-
+		
 		Uncompressing Linux... done, booting the kernel.
 		[    0.000000] Initializing cgroup subsys cpu
 		[    0.000000] Linux version 3.0.8-FriendlyARM (root@kangear) (gcc version 4.5.1 (ctng-1.8.1-FA) ) #1 PREEMPT Fri Jul 26 22:26:05 CST 2013
