@@ -13,7 +13,7 @@
  - rootfs_qtopia_qt4是rootfs_qtopia_qt4-20130222.tar.gz通过命令行解压得来的 
 > 
  - uImage_308是友善光盘中的3.08内核make uImage得来的
-> 
+
 ###
 		[Ver130726-TINY210v2]# tftp uImage_308
 		dm9000 i/o: 0x88001000, id: 0x90000a46 
