@@ -155,7 +155,7 @@ ifdef CONFIG_SAMSUNG
 $(obj)$(BOARD)-spl.bin: $(obj)u-boot-spl.bin
 	$(OBJTREE)/tools/mk$(SOC)spl \
 		$(obj)u-boot-spl.bin $(obj)$(BOARD)-spl.bin
-	cat $(obj)$(BOARD)-spl.bin $(TOPDIR)/u-boot.bin > $(TOPDIR)/$(BOARD)v2-uboot.bin
+	cat $(obj)$(BOARD)-spl.bin $(OBJTREE)/u-boot.bin > $(OBJTREE)/$(BOARD)v2-uboot.bin
 endif
 
 $(obj)u-boot-spl.bin:	$(obj)u-boot-spl
