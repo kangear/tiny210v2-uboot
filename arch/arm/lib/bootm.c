@@ -414,3 +414,19 @@ int bootz_setup(void *image, void **start, void **end)
 	return 0;
 }
 #endif	/* CONFIG_CMD_BOOTZ */
+
+unsigned long do_go_exec(ulong (*entry)(int, char * const []), int argc,
+                                 char * const argv[])
+{
+	ulong magic;
+	bootm_headers_t images;
+
+	magic = *(ulong*)((ulong)entry + 4*9);
+	if (0x016f2818 != magic)
+		return entry (argc, argv);
+
+	images.ep = (ulong)entry;
+	return do_bootm_linux(0, argc, argv, &images);
+        return entry (argc, argv);
+}
+
