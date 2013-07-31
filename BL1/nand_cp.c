@@ -21,6 +21,7 @@
  * 2013-6-9添加了nandll_read_n_byte，改善了读的速度。256k只需要3秒钟就可以
  * copy完
  * 2013-6-25进行的优化，去掉无关的注释
+ * 2013-7-31添加了对page_size为2k的SLC的NandFlash启动支持
  */
 
 #include "stdio.h"
@@ -75,7 +76,7 @@ typedef unsigned long		ulong;
 #include "s5pv210.h"
 //#define	COPY_BL2_SIZE		882046
 //#define CONFIG_SYS_TEXT_BASE 0x22000000
-#define DEBUG
+//#define DEBUG
 #ifdef  DEBUG  
 #define debug(fmt,args...)  printf (fmt ,##args)  
 #define debugX(level,fmt,args...) if (DEBUG>=level) printf(fmt,##args);  
@@ -412,13 +413,12 @@ static int nandll_read_blocks (ulong dst_addr, ulong size, int large_block)
 
 	if (1 == large_block)
 	{
+		debug("large_block = %d\r\n", large_block);
 		page_shift = 11;
-	
-		/* Read pages */
-		for (i = (0x6000>>page_shift); i < (size>>page_shift); i++, buf+=(1<<page_shift)) 
-		{
+		
+		for (i = 8; i < (8 + (size>>page_shift)); i++, buf+=(1<<(page_shift)))
 			nandll_read_page(buf, i, large_block);
-		}
+
 	}
 	else if(3 == large_block)
 	{
@@ -447,7 +447,7 @@ int copy_uboot_to_ram_nand (void)
 	NAND_ENABLE_CE();
 	NFCMD_REG = NAND_CMD_READID;
 	NFADDR_REG =  0x00;
-
+	printf("NAND: ");
 	/* wait for a while */
 	for (i=0; i<200; i++);
 	for (i=0; i<4; i++)
@@ -456,14 +456,20 @@ int copy_uboot_to_ram_nand (void)
 		id |= tmp_id << (3-i)*8;
 	}
 
-	if (tmp_id > 0x80)
+	if (0xECDA1095 == id)
+	{
 		large_block = 1;
-	
-	printf("NAND: 2GB(MLC2) ID:%x\n\r", id);
-	
-	if(id == 0xECD59476)
+		//large_block = 2;
+		printf("256MB(SLC) ");
+	}
+	else if(0xECD59476 == id)
+	{
 		large_block = 3;
-
+		printf("2GB(MLC2) ");
+	}
+	else
+		printf("NandFlash Unsupported");
+	printf("ID:%x\n\r", id);
 	/* read NAND Block.
 	 * 128KB ->240KB because of U-Boot size increase. by scsuh
 	 * So, read 0x3c000 bytes not 0x20000(128KB).
@@ -483,7 +489,7 @@ void board_init_f_nand(unsigned long bootflag)
 {
 	__attribute__((noreturn)) void (*uboot)(void);
 	
-	printf("\n\rBL1 Ver:1307020\n\r");
+	printf("\n\rBL1 Ver:1307031\n\r");
 	printf("Start cp \n\r");
 	
 	copy_uboot_to_ram_nand();
