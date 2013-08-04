@@ -71,7 +71,7 @@
 		s3c-nand: 1 bit(s) error detected, corrected successfully
 		s3c-nand: 1 bit(s) error detected, corrected successfully
 		s3c-nand: 1 bit(s) error detected, corrected successfully
-		 5242880 bytes read: OK
+			5242880 bytes read: OK
 		[Ver130726-TINY210v2]# bootm
 		## Booting kernel from Legacy Image at 21000000 ...
 			Image Name:   Linux-3.0.8-FriendlyARM
