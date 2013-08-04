@@ -1,5 +1,8 @@
 ##2013-08-03 Support 16bit-ECC write
 说明:　用一个全是aa的8k二进制文件aImage来测试，已经可以生成校验码了
+
+目前情况：可以实现16bit ECC校验，校验某处不准确，现在内核还不能启动起来。
+
 ###
 		U-Boot 2013.01-rc2-g36c122f-dirty (Aug 04 2013 - 16:39:56) for TINY210(Nand:K9GAG08U0F)
 
