@@ -1,4 +1,7 @@
-##2013-07-27 支持tftp下载内核nfs挂载根文件系统
+##2013-08-03 Support 16bit-ECC write
+
+
+2013-07-27 支持tftp下载内核nfs挂载根文件系统
 ###
 		step1: setenv machid 0xd8a
 		step2: setenv bootargs root=/dev/nfs nfsroot=192.168.1.229:/work/rootfs_dir/nfs_rootfs/rootfs_qtopia_qt4 ip=192.168.1.230:192.168.1.229:192.168.1.1:255.255.255.0::eth0:off console=ttySAC0,115200 mem=512M
