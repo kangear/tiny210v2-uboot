@@ -2,6 +2,86 @@
 说明:　用一个全是aa的8k二进制文件aImage来测试，已经可以生成校验码了
 
 目前情况：可以实现16bit ECC校验，校验某处不准确，现在内核还不能启动起来。
+###
+		U-Boot 2013.01-rc2-geeb2178 (Aug 04 2013 - 21:59:53) for TINY210(Nand:K9GAG08U0F)
+
+		CPU:    S5PC110@1000MHz
+
+		Board:   FriendlyARM-TINY210
+		DRAM:  512 MiB
+		WARNING: Caches not enabled
+
+		PWM Moudle Initialized.
+		GPD0CON  : 1111, GPD0DAT  : e
+		NAND:  !type->pagesize = 1
+		((nand->cellinfo >> 2) & 0x3) = 1
+		(1024 << (tmp & 3)) = 4096That is kangear!
+		2048 MiB
+		MMC:   SAMSUNG SD/MMC: 0, SAMSUNG SD/MMC: 1
+		In:    serial
+		Out:   serial
+		Err:   serial
+		Net:   dm9000
+		Hit any key to stop autoboot:  0 
+		[Ver130726-TINY210v2]# tftp uImage_308
+		dm9000 i/o: 0x88001000, id: 0x90000a46 
+		DM9000: running in 16 bit mode
+		MAC: 00:40:5c:26:0a:5b
+		operating at 100M full duplex mode
+		Using dm9000 device
+		TFTP from server 192.168.1.229; our IP address is 192.168.1.230
+		Filename 'uImage_308'.
+		Load address: 0x21000000
+		Loading: #################################################################
+			#################################################################
+			#################################################################
+			#################################################################
+			#################################################################
+			###
+		done
+		Bytes transferred = 4811624 (496b68 hex)
+		[Ver130726-TINY210v2]# nand write 21000000 400000 500000
+
+		NAND write: device 0 offset 0x400000, size 0x500000
+			5242880 bytes written: OK
+		[Ver130726-TINY210v2]# nand read 21000000 400000 500000 
+
+		NAND read: device 0 offset 0x400000, size 0x500000
+		s3c-nand: 1 bit(s) error detected, corrected successfully
+		s3c-nand: 1 bit(s) error detected, corrected successfully
+		s3c-nand: 1 bit(s) error detected, corrected successfully
+		s3c-nand: 1 bit(s) error detected, corrected successfully
+		s3c-nand: 1 bit(s) error detected, corrected successfully
+		s3c-nand: 1 bit(s) error detected, corrected successfully
+		s3c-nand: 1 bit(s) error detected, corrected successfully
+		s3c-nand: 1 bit(s) error detected, corrected successfully
+		s3c-nand: 1 bit(s) error detected, corrected successfully
+		s3c-nand: 1 bit(s) error detected, corrected successfully
+		s3c-nand: 1 bit(s) error detected, corrected successfully
+		s3c-nand: 1 bit(s) error detected, corrected successfully
+		s3c-nand: 1 bit(s) error detected, corrected successfully
+		s3c-nand: 1 bit(s) error detected, corrected successfully
+		s3c-nand: 1 bit(s) error detected, corrected successfully
+		s3c-nand: 1 bit(s) error detected, corrected successfully
+		s3c-nand: 1 bit(s) error detected, corrected successfully
+		s3c-nand: 1 bit(s) error detected, corrected successfully
+		s3c-nand: 1 bit(s) error detected, corrected successfully
+		s3c-nand: 1 bit(s) error detected, corrected successfully
+		s3c-nand: 1 bit(s) error detected, corrected successfully
+		s3c-nand: 1 bit(s) error detected, corrected successfully
+		s3c-nand: 1 bit(s) error detected, corrected successfully
+		s3c-nand: 1 bit(s) error detected, corrected successfully
+		 5242880 bytes read: OK
+		[Ver130726-TINY210v2]# bootm
+		## Booting kernel from Legacy Image at 21000000 ...
+			Image Name:   Linux-3.0.8-FriendlyARM
+			Image Type:   ARM Linux Kernel Image (uncompressed)
+			Data Size:    4811560 Bytes = 4.6 MiB
+			Load Address: 20008000
+			Entry Point:  20008000
+			Verifying Checksum ... Bad Data CRC
+		ERROR: can't get kernel image!
+		[Ver130726-TINY210v2]# 
 
 ###
 		U-Boot 2013.01-rc2-g36c122f-dirty (Aug 04 2013 - 16:39:56) for TINY210(Nand:K9GAG08U0F)
