@@ -107,6 +107,31 @@ static struct nand_ecclayout s3c_nand_oob_128 = {
                 {.offset = 2,
                  .length = 22}}
 };
+/* add by kangear */
+static struct nand_ecclayout s3c_nand_oob_512_16bit = {
+        .eccbytes = 416,
+        .eccpos = {
+                   36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 
+                   64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 
+                   92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 
+                   120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 
+                   148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 
+                   176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 
+                   204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 
+                   232, 233, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255, 256, 257, 
+                   260, 261, 262, 263, 264, 265, 266, 267, 268, 269, 270, 271, 272, 273, 274, 275, 276, 277, 278, 279, 280, 281, 282, 283, 284, 285, 
+                   288, 289, 290, 291, 292, 293, 294, 295, 296, 297, 298, 299, 300, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 
+                   316, 317, 318, 319, 320, 321, 322, 323, 324, 325, 326, 327, 328, 329, 330, 331, 332, 333, 334, 335, 336, 337, 338, 339, 340, 341, 
+                   344, 345, 346, 347, 348, 349, 350, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 369, 
+                   372, 373, 374, 375, 376, 377, 378, 379, 380, 381, 382, 383, 384, 385, 386, 387, 388, 389, 390, 391, 392, 393, 394, 395, 396, 397, 
+                   400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 418, 419, 420, 421, 422, 423, 424, 425, 
+                   428, 429, 430, 431, 432, 433, 434, 435, 436, 437, 438, 439, 440, 441, 442, 443, 444, 445, 446, 447, 448, 449, 450, 451, 452, 453, 
+                   456, 457, 458, 459, 460, 461, 462, 463, 464, 465, 466, 467, 468, 469, 470, 471, 472, 473, 474, 475, 476, 477, 478, 479, 480, 481},
+        .oobfree = {
+                {.offset = 2,
+                 .length = 22}}
+};
+
 #if defined(S3C_NAND_DEBUG)
 /*
  * Function to print out oob buffer for debugging
@@ -241,7 +266,7 @@ static void s3c_nand_enable_hwecc(struct mtd_info *mtd, int mode)
 		nfconf |= NFCONF_ECC_MLC;	/* MLC */
 
 	writel(nfconf, NFCONF);
-	printf("NFCONF = %x\n",nfconf);
+	//printf("NFCONF = %x\n",nfconf);
 	/* Initialize & unlock */
 	nfcont = readl(NFCONT);
 	nfcont |= NFCONT_INITMECC;
@@ -783,6 +808,404 @@ int s3c_nand_write_oob_8bit(struct mtd_info *mtd, struct nand_chip *chip, int pa
 /********************************************************/
 #endif
 
+/***************************************************************
+ * kangear: Temporary 16 Bit H/W ECC supports for BL1 (210 only)
+ ***************************************************************/
+static void s3c_nand_wait_ecc_busy_16bit(void)
+{
+	while (readl(NFECCSTAT) & NFESTAT0_ECCBUSY) {
+	}
+}
+
+void s3c_nand_enable_hwecc_16bit(struct mtd_info *mtd, int mode)
+{
+	u_long nfreg;
+	
+	cur_ecc_mode = mode;
+
+	if(cur_ecc_mode == NAND_ECC_WRITE){
+
+	/* 8 bit selection */
+	nfreg = readl(NFCONF);
+	nfreg &= ~(0x3 << 23);
+	nfreg |= (0x3<< 23);
+	writel(nfreg, NFCONF);
+	
+	/* Set ECC type 8/12/[16bit] */
+	nfreg = readl(NFECCCONF);
+	nfreg &= 0xf;
+	nfreg |= 0x5;
+	writel(nfreg, NFECCCONF);
+
+	/* set 8/12/16bit Ecc direction to Encoding [Encoding]*/
+	nfreg = readl(NFECCCONT);
+	nfreg &= ~(0x1 << 16);
+	nfreg |= (0x1 << 16);
+	writel(nfreg, NFECCCONT);
+
+	/* set 8/12/16bit ECC message length  to msg [512] */
+	nfreg = readl(NFECCCONF);
+	nfreg &= ~((0x3ff<<16));
+	nfreg |= (0x1ff << 16);
+	writel(nfreg, NFECCCONF);
+
+	/* write '1' to clear this bit. */
+	/* clear illegal access status bit */
+	nfreg = readl(NFSTAT);
+	nfreg |= (0x1 << 4);
+	nfreg |= (0x1 << 5);
+	writel(nfreg, NFSTAT);
+
+	/* clear 8/12/16bit ecc encode done */
+	nfreg = readl(NFECCSTAT);
+	nfreg |= (0x1 << 25);
+	writel(nfreg, NFECCSTAT);
+
+	nfreg = readl(NFCONT);
+	nfreg &= ~(0x1 << 1);
+	writel(nfreg, NFCONT);
+	
+	/* Initialize & unlock */
+	nfreg = readl(NFCONT);
+	nfreg &= ~NFCONT_MECCLOCK;
+	nfreg |= NFCONT_INITECC;	
+	writel(nfreg, NFCONT);
+
+	/* Reset ECC value. */
+	nfreg = readl(NFECCCONT);
+	nfreg |= (0x1 << 2);
+	writel(nfreg, NFECCCONT);
+	
+	}else{
+
+	/* set 8/12/16bit ECC message length  to msg [512]*/
+	nfreg = readl(NFECCCONF);
+	nfreg &= ~((0x3ff<<16));
+	nfreg |= (0x1ff << 16);
+	writel(nfreg, NFECCCONF);
+	
+	/* set 8/12/16bit Ecc direction to Decoding [Decoding]*/
+	nfreg = readl(NFECCCONT);
+	nfreg &= ~(0x1 << 16);
+	writel(nfreg, NFECCCONT);
+	
+	/* write '1' to clear this bit. */
+	/* clear illegal access status bit */
+	nfreg = readl(NFSTAT);
+	nfreg |= (0x1 << 4);
+	nfreg |= (0x1 << 5);
+	writel(nfreg, NFSTAT);
+
+	/* Lock */
+	nfreg = readl(NFCONT);
+	nfreg |= NFCONT_MECCLOCK;
+	writel(nfreg, NFCONT);
+
+	nfreg = readl(NFCONT);
+	nfreg &= ~(0x1 << 1);
+	writel(nfreg, NFCONT);
+
+	/* clear 8/12/16bit ecc decode done */
+	nfreg = readl(NFECCSTAT);
+	nfreg |= (0x1 << 24);
+	writel(nfreg, NFECCSTAT);
+	
+	/* Initialize & lock */
+	nfreg = readl(NFCONT);
+	nfreg &= ~NFCONT_MECCLOCK;
+	nfreg |= NFCONT_MECCLOCK;
+	writel(nfreg, NFCONT);
+
+	/* write '1' to clear this bit. */
+	nfreg = readl(NFSTAT);
+	nfreg &= ~(1<<4);
+	nfreg |= (1<<4);
+	writel(nfreg, NFSTAT);
+
+	while(!(nfreg &(1<<4))){
+		nfreg = readl(NFSTAT);
+		}
+
+	/* write '1' to clear this bit. */
+	nfreg = readl(NFSTAT);
+	nfreg &= ~(1<<4);
+	nfreg |= (1<<4);
+	writel(nfreg, NFSTAT);
+	
+	/* Initialize & unlock */
+	nfreg = readl(NFCONT);
+	nfreg &= ~NFCONT_MECCLOCK;
+	nfreg |= NFCONT_INITECC;	
+	writel(nfreg, NFCONT);
+
+	/* Reset ECC value. */
+	nfreg = readl(NFECCCONT);
+	nfreg |= (0x1 << 2);
+	writel(nfreg, NFECCCONT);
+	}
+
+}
+
+int s3c_nand_calculate_ecc_16bit(struct mtd_info *mtd, const u_char *dat, u_char *ecc_code)
+{
+	u_long nfcont, nfeccprgecc0, nfeccprgecc1, nfeccprgecc2, nfeccprgecc3, nfeccprgecc4, nfeccprgecc5, nfeccprgecc6;
+
+	if (cur_ecc_mode == NAND_ECC_READ) {
+		/* Lock */
+		nfcont = readl(NFCONT);
+		nfcont |= NFCONT_MECCLOCK;
+		writel(nfcont, NFCONT);
+		
+		s3c_nand_wait_dec();
+
+		/* clear 8/12/16bit ecc decode done */
+		nfcont = readl(NFECCSTAT);
+		nfcont |= (1<<24);
+		writel(nfcont, NFECCSTAT);
+
+		s3c_nand_wait_ecc_busy_8bit();
+
+		if(readl(NFSTAT)&(1<<5))
+		{
+			/* clear illegal access status bit */
+			nfcont = readl(NFSTAT);
+			nfcont |= (1<<5);
+			writel(nfcont, NFSTAT);
+
+			printf("\n Accessed locked area!! \n");
+			
+			nfcont = readl(NFCONT);
+			nfcont |= (1<<1);
+			writel(nfcont, NFCONT);
+			
+			return -1;
+		}
+		
+		nfcont = readl(NFCONT);
+		nfcont |= (1<<1);
+		writel(nfcont, NFCONT);
+
+		
+	} else {
+		/* Lock */
+		nfcont = readl(NFCONT);
+		nfcont |= NFCONT_MECCLOCK;
+		writel(nfcont, NFCONT);
+		
+		s3c_nand_wait_enc();
+
+		/* clear 8/12/16bit ecc encode done */
+		nfcont = readl(NFECCSTAT);
+		nfcont |= (1<<25);
+		writel(nfcont, NFECCSTAT);
+
+		nfeccprgecc0 = readl(NFECCPRGECC0);
+		nfeccprgecc1 = readl(NFECCPRGECC1);
+		nfeccprgecc2 = readl(NFECCPRGECC2);
+		nfeccprgecc3 = readl(NFECCPRGECC3);
+		nfeccprgecc4 = readl(NFECCPRGECC4);
+		nfeccprgecc5 = readl(NFECCPRGECC5);
+		nfeccprgecc6 = readl(NFECCPRGECC6);
+	
+		ecc_code[0] = nfeccprgecc0 & 0xff;
+		ecc_code[1] = (nfeccprgecc0 >> 8) & 0xff;
+		ecc_code[2] = (nfeccprgecc0 >> 16) & 0xff;
+		ecc_code[3] = (nfeccprgecc0 >> 24) & 0xff;
+		ecc_code[4] = nfeccprgecc1 & 0xff;
+		ecc_code[5] = (nfeccprgecc1 >> 8) & 0xff;
+		ecc_code[6] = (nfeccprgecc1 >> 16) & 0xff;
+		ecc_code[7] = (nfeccprgecc1 >> 24) & 0xff;
+		ecc_code[8] = nfeccprgecc2 & 0xff;
+		ecc_code[9] = (nfeccprgecc2 >> 8) & 0xff;
+		ecc_code[10] = (nfeccprgecc2 >> 16) & 0xff;
+		ecc_code[11] = (nfeccprgecc2 >> 24) & 0xff;
+		ecc_code[12] = nfeccprgecc3 & 0xff;
+		ecc_code[13] = (nfeccprgecc3 >> 8) & 0xff;
+		ecc_code[14] = (nfeccprgecc3 >> 16) & 0xff;
+		ecc_code[15] = (nfeccprgecc3 >> 24) & 0xff;
+		ecc_code[16] = nfeccprgecc4 & 0xff;
+		ecc_code[17] = (nfeccprgecc4 >> 8) & 0xff;
+		ecc_code[18] = (nfeccprgecc4 >> 16) & 0xff;
+		ecc_code[19] = (nfeccprgecc4 >> 24) & 0xff;
+		ecc_code[20] = nfeccprgecc5 & 0xff;
+		ecc_code[21] = (nfeccprgecc5 >> 8) & 0xff;
+		ecc_code[22] = (nfeccprgecc5 >> 16) & 0xff;
+		ecc_code[23] = (nfeccprgecc5 >> 24) & 0xff;
+		ecc_code[24] = nfeccprgecc6 & 0xff;
+		ecc_code[25] = (nfeccprgecc6 >> 8) & 0xff;	
+
+	}
+
+	return 0;
+}
+
+int s3c_nand_correct_data_16bit(struct mtd_info *mtd, u_char *dat)
+{
+	int ret = -1;
+	u_long nf8eccerr0, nf8eccerr1, nf8eccerr2, nf8eccerr3, nf8eccerr4, nfmlc8bitpt0, nfmlc8bitpt1;
+	u_char err_type;
+
+	s3c_nand_wait_ecc_busy_8bit();
+
+	nf8eccerr0 = readl(NFECCSECSTAT);
+	nf8eccerr1 = readl(NFECCERL0);
+	nf8eccerr2 = readl(NFECCERL1);
+	nf8eccerr3 = readl(NFECCERL2);
+	nf8eccerr4 = readl(NFECCERL3);
+	nfmlc8bitpt0 = readl(NFECCERP0);
+	nfmlc8bitpt1 = readl(NFECCERP1);
+
+	err_type = (nf8eccerr0) & 0xf;
+
+	/* No error, If free page (all 0xff) */
+	if ((nf8eccerr0 >> 29) & 0x1)
+		err_type = 0;
+
+	switch (err_type) {
+	case 9: /* Uncorrectable */
+		printk("s3c-nand: ECC uncorrectable error detected\n");
+		ret = -1;
+		break;
+
+	case 8: /* 8 bit error (Correctable) */
+		dat[(nf8eccerr4 >> 16) & 0x3ff] ^= ((nfmlc8bitpt1 >> 24) & 0xff);
+
+	case 7: /* 7 bit error (Correctable) */
+		dat[(nf8eccerr4) & 0x3ff] ^= ((nfmlc8bitpt1 >> 16) & 0xff);
+
+	case 6: /* 6 bit error (Correctable) */
+		dat[(nf8eccerr3 >> 16) & 0x3ff] ^= ((nfmlc8bitpt1 >> 8) & 0xff);
+
+	case 5: /* 5 bit error (Correctable) */
+		dat[(nf8eccerr3) & 0x3ff] ^= ((nfmlc8bitpt1) & 0xff);
+
+	case 4: /* 8 bit error (Correctable) */
+		dat[(nf8eccerr2 >> 16) & 0x3ff] ^= ((nfmlc8bitpt0 >> 24) & 0xff);
+
+	case 3: /* 7 bit error (Correctable) */
+		dat[(nf8eccerr2) & 0x3ff] ^= ((nfmlc8bitpt0>> 16) & 0xff);
+
+	case 2: /* 6 bit error (Correctable) */
+		dat[(nf8eccerr1 >> 16) & 0x3ff] ^= ((nfmlc8bitpt0>> 8) & 0xff);
+
+	case 1: /* 1 bit error (Correctable) */
+		printk("s3c-nand: %d bit(s) error detected, corrected successfully\n", err_type);
+		dat[(nf8eccerr1) & 0x3ff] ^= ((nfmlc8bitpt0) & 0xff);
+		ret = err_type;
+		break;
+
+	case 0: /* No error */
+		ret = 0;
+		break;
+	}
+
+	return ret;
+}
+
+void s3c_nand_write_page_16bit(struct mtd_info *mtd, struct nand_chip *chip,
+				  const uint8_t *buf)
+{	
+	u_long nfreg;
+	int i, j, eccsize = 512;
+	int eccbytes = 26;
+	int eccsteps = mtd->writesize / eccsize;
+	int badoffs = mtd->writesize == 512 ? NAND_SMALL_BADBLOCK_POS : NAND_LARGE_BADBLOCK_POS;
+
+	uint8_t *ecc_calc = chip->buffers->ecccalc;
+	uint8_t *p = buf;
+	
+	for (i = 0; eccsteps; eccsteps--, i += eccbytes, p += eccsize) {
+		s3c_nand_enable_hwecc_16bit(mtd, NAND_ECC_WRITE);
+		chip->write_buf(mtd, p, eccsize);
+		s3c_nand_calculate_ecc_16bit(mtd, p, &ecc_calc[i]);
+	}
+
+	chip->oob_poi[badoffs] = 0xff;
+	for (i = 0, j = 0; i <= eccbytes * (mtd->writesize / eccsize); i++, j++) {
+#if defined(CONFIG_EVT1)
+		chip->oob_poi[j+36] = ecc_calc[i];
+#else
+		chip->oob_poi[j] = ecc_calc[i];
+#endif
+		if((i+1)%26 == 0)
+			j += 2;
+	}
+
+	chip->write_buf(mtd, chip->oob_poi, mtd->oobsize);
+}
+
+int s3c_nand_read_page_16bit(struct mtd_info *mtd, struct nand_chip *chip,
+				uint8_t *buf)
+{
+	u_long nfreg;
+	int i, stat, eccsize = 512;
+	int eccbytes = 26;
+	int eccsteps = mtd->writesize / eccsize;
+	int col = 0;
+	uint8_t *p = buf;
+	
+	/* Step1: read whole oob */
+	col = mtd->writesize;
+#if defined(CONFIG_EVT1)
+	chip->cmdfunc(mtd, NAND_CMD_RNDOUT, col+36, -1);
+#else
+	chip->cmdfunc(mtd, NAND_CMD_RNDOUT, col, -1);
+#endif
+	chip->read_buf(mtd, chip->oob_poi, mtd->oobsize);
+
+	col = 0;
+
+	for (i = 0; eccsteps; eccsteps--, i += eccbytes, p += eccsize) {
+
+		chip->cmdfunc(mtd, NAND_CMD_RNDOUT, col, -1);
+		s3c_nand_enable_hwecc_16bit(mtd, NAND_ECC_READ);
+		chip->read_buf(mtd, p, eccsize);
+		chip->write_buf(mtd, chip->oob_poi + (((mtd->writesize / eccsize) - eccsteps) * eccbytes), eccbytes);
+		s3c_nand_calculate_ecc_16bit(mtd, 0, 0);
+		stat = s3c_nand_correct_data_16bit(mtd, p);
+
+		if (stat == -1)
+			mtd->ecc_stats.failed++;
+
+		col = eccsize * ((mtd->writesize / eccsize) + 1 - eccsteps);
+	}
+
+	return 0;
+}
+#ifdef CONFIG_KANGEAR_16BIT
+int s3c_nand_read_oob_8bit(struct mtd_info *mtd, struct nand_chip *chip, int page, int sndcmd)
+{
+        int eccbytes = chip->ecc.bytes;
+        int secc_start = mtd->oobsize - eccbytes;
+
+        if (sndcmd) {
+                chip->cmdfunc(mtd, NAND_CMD_READOOB, 0, page);
+                sndcmd = 0;
+        }
+
+        chip->read_buf(mtd, chip->oob_poi, 0); //secc_start);
+        return sndcmd;
+}
+
+int s3c_nand_write_oob_8bit(struct mtd_info *mtd, struct nand_chip *chip, int page)
+{
+        int status = 0;
+        int eccbytes = chip->ecc.bytes;
+        int secc_start = mtd->oobsize - eccbytes;
+
+        chip->cmdfunc(mtd, NAND_CMD_SEQIN, mtd->writesize, page);
+
+        /* spare area */
+        chip->write_buf(mtd, chip->oob_poi, 0); //secc_start);
+
+        /* Send command to program the OOB data */
+        chip->cmdfunc(mtd, NAND_CMD_PAGEPROG, -1, -1);
+        status = chip->waitfunc(mtd, chip);
+        return status & NAND_STATUS_FAIL ? -EIO : 0;
+}
+
+/********************************************************/
+#endif
 static int s3c_nand_write_oob_1bit(struct mtd_info *mtd, struct nand_chip *chip,
 			      int page)
 {
@@ -1059,8 +1482,10 @@ int board_nand_init(struct nand_chip *nand)
 
 	nand->cellinfo = readb(nand->IO_ADDR_R);	/* 3rd byte */
 	tmp = readb(nand->IO_ADDR_R);			/* 4th byte */
-
+	printf("!type->pagesize = %d\n", !type->pagesize);
 	if (!type->pagesize) {
+		printf("((nand->cellinfo >> 2) & 0x3) = %d\n", ((nand->cellinfo >> 2) & 0x3));
+		printf("(1024 << (tmp & 3)) = %d", (1024 << (tmp & 3)));
 		if (((nand->cellinfo >> 2) & 0x3) == 0) {
 			nand_type = S3C_NAND_TYPE_SLC;
 			nand->ecc.size = 512;
@@ -1078,8 +1503,8 @@ int board_nand_init(struct nand_chip *nand)
 			nand->ecc.size = 512;
 			nand->ecc.bytes = 13;
 			nand->options |= NAND_NO_SUBPAGE_WRITE;}
-		else 
-			if ((1024 << (tmp & 0x3)) > 512) {
+			else 	
+				if ((1024 << (tmp & 0x3)) > 512) {
 #if defined(CONFIG_NAND_4BIT_ECC)				
 				nand->ecc.read_page = s3c_nand_read_page_1bit;
 				nand->ecc.write_page = s3c_nand_write_page_1bit;
@@ -1091,22 +1516,37 @@ int board_nand_init(struct nand_chip *nand)
                                 nand->ecc.correct = s3c_nand_correct_data;
                                 nand->options |= NAND_NO_SUBPAGE_WRITE;
 #else
-	nand->ecc.read_page = s3c_nand_read_page_8bit;
-	nand->ecc.write_page = s3c_nand_write_page_8bit;
-	nand->ecc.read_oob = s3c_nand_read_oob_8bit;
-	nand->ecc.write_oob = s3c_nand_write_oob_8bit;
-	nand->ecc.layout = &s3c_nand_oob_64_8bit;
-	nand->ecc.hwctl = s3c_nand_enable_hwecc_8bit;
-	nand->ecc.calculate = s3c_nand_calculate_ecc_8bit;
-	nand->ecc.correct = s3c_nand_correct_data_8bit;
-	nand->ecc.size = 512;
-	nand->ecc.bytes = 13;
-	nand->options |= NAND_NO_SUBPAGE_WRITE;
+				nand->ecc.read_page = s3c_nand_read_page_8bit;
+				nand->ecc.write_page = s3c_nand_write_page_8bit;
+				nand->ecc.read_oob = s3c_nand_read_oob_8bit;
+				nand->ecc.write_oob = s3c_nand_write_oob_8bit;
+				nand->ecc.layout = &s3c_nand_oob_64_8bit;
+				nand->ecc.hwctl = s3c_nand_enable_hwecc_8bit;
+				nand->ecc.calculate = s3c_nand_calculate_ecc_8bit;
+				nand->ecc.correct = s3c_nand_correct_data_8bit;
+				nand->ecc.size = 512;
+				nand->ecc.bytes = 13;
+				nand->options |= NAND_NO_SUBPAGE_WRITE;
 #endif
 			} else {
 				nand->ecc.layout = &s3c_nand_oob_16;
 			}
 		} else {
+			printf("That is kangear!\n");
+			nand_type = S3C_NAND_TYPE_MLC;
+#if 1
+			nand->ecc.read_page = s3c_nand_read_page_16bit;
+			nand->ecc.write_page = s3c_nand_write_page_16bit;
+			nand->ecc.read_oob = s3c_nand_read_oob_8bit;
+			nand->ecc.write_oob = s3c_nand_write_oob_8bit;
+			nand->ecc.layout = &s3c_nand_oob_512_16bit;
+			nand->ecc.hwctl = s3c_nand_enable_hwecc_16bit;
+			nand->ecc.calculate = s3c_nand_calculate_ecc_8bit;
+			nand->ecc.correct = s3c_nand_correct_data_8bit;
+			nand->ecc.size = 512;
+			nand->ecc.bytes = 26;
+			nand->options |= NAND_NO_SUBPAGE_WRITE;
+#else
 			nand_type = S3C_NAND_TYPE_MLC;
 			nand->options |= NAND_NO_SUBPAGE_WRITE;	/* NOP = 1 if MLC */
 			nand->ecc.read_page = s3c_nand_read_page_4bit;
@@ -1114,6 +1554,7 @@ int board_nand_init(struct nand_chip *nand)
 			nand->ecc.size = 512;
 			nand->ecc.bytes = 8;	/* really 7 bytes */
 			nand->ecc.layout = &s3c_nand_oob_mlc_64;
+#endif
 		}
 	} else {
 		nand_type = S3C_NAND_TYPE_SLC;
