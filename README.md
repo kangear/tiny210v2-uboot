@@ -1,4 +1,35 @@
-##2013-08-03 Support 16bit-ECC write
+##2013-08-17 Support NAND: 512MB(SLC) ID:ECDC1095(smart210)
+###
+		BL1 Ver:1307031
+		Start cp 
+		NAND: 512MB(SLC) ID:ECDC1095
+		Running! 
+		K
+
+		U-Boot 2013.01-rc2-g0340193-dirty (Aug 17 2013 - 14:29:46) for TINY210(Nand:K9GAG08U0F)
+
+		CPU:    S5PC110@1000MHz
+
+		Board:   FriendlyARM-TINY210
+		DRAM:  512 MiB
+		WARNING: Caches not enabled
+
+		PWM Moudle Initialized.
+		GPD0CON  : 1111, GPD0DAT  : e
+		NAND:  !type->pagesize = 1
+		((nand->cellinfo >> 2) & 0x3) = 0
+		(1024 << (tmp & 3)) = 2048512 MiB
+		MMC:   SAMSUNG SD/MMC: 0, SAMSUNG SD/MMC: 1
+		*** Warning - bad CRC, using default environment
+
+		In:    serial
+		Out:   serial
+		Err:   serial
+		Net:   dm9000
+		[Ver130726-TINY210v2]# 
+
+
+2013-08-03 Support 16bit-ECC write
 说明:　用一个全是aa的8k二进制文件aImage来测试，已经可以生成校验码了
 
 目前情况：可以实现16bit ECC校验，校验某处不准确，现在内核还不能启动起来。
