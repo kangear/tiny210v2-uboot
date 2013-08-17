@@ -462,6 +462,13 @@ int copy_uboot_to_ram_nand (void)
 		//large_block = 2;
 		printf("256MB(SLC) ");
 	}
+	else if(0xECDC1095 == id)
+	{
+		large_block = 1;
+		//page_size 2k
+		printf("512MB(SLC) ");
+
+	}
 	else if(0xECD59476 == id)
 	{
 		large_block = 3;
