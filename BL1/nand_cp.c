@@ -460,23 +460,23 @@ int copy_uboot_to_ram_nand (void)
 	{
 		large_block = 1;
 		//large_block = 2;
-		printf("256MB(SLC) ");
+		debug("256MB(SLC) ");
 	}
 	else if(0xECDC1095 == id)
 	{
 		large_block = 1;
 		//page_size 2k
-		printf("512MB(SLC) ");
+		debug("512MB(SLC) ");
 
 	}
 	else if(0xECD59476 == id)
 	{
 		large_block = 3;
-		printf("2GB(MLC2) ");
+		debug("2GB(MLC2) ");
 	}
 	else
-		printf("NandFlash Unsupported");
-	printf("ID:%x\n\r", id);
+		printf("NandFlash Unsupportedi\r\n");
+	debug("ID:%x\n\r", id);
 	/* read NAND Block.
 	 * 128KB ->240KB because of U-Boot size increase. by scsuh
 	 * So, read 0x3c000 bytes not 0x20000(128KB).
@@ -496,8 +496,8 @@ void board_init_f_nand(unsigned long bootflag)
 {
 	__attribute__((noreturn)) void (*uboot)(void);
 	
-	printf("\n\rBL1 Ver:1307031\n\r");
-	printf("Start cp \n\r");
+	debug("\n\rBL1 Ver:1307031\n\r");
+	debug("Start cp \n\r");
 	
 	copy_uboot_to_ram_nand();
 	//跳转之前要进行cleanup_before_uboot
@@ -505,7 +505,7 @@ void board_init_f_nand(unsigned long bootflag)
 	/* Jump to U-Boot image */
 	uboot = (void *)CONFIG_SYS_TEXT_BASE;
 	
-	printf("Running! \n\r");
+	debug("Running! \n\r");
 
 	(*uboot)();
 	/* Never returns Here */
