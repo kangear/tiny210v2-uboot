@@ -1484,10 +1484,10 @@ int board_nand_init(struct nand_chip *nand)
 
 	nand->cellinfo = readb(nand->IO_ADDR_R);	/* 3rd byte */
 	tmp = readb(nand->IO_ADDR_R);			/* 4th byte */
-	printf("!type->pagesize = %d\n", !type->pagesize);
+	//printf("!type->pagesize = %d\n", !type->pagesize);
 	if (!type->pagesize) {
-		printf("((nand->cellinfo >> 2) & 0x3) = %d\n", ((nand->cellinfo >> 2) & 0x3));
-		printf("(1024 << (tmp & 3)) = %d", (1024 << (tmp & 3)));
+		//printf("((nand->cellinfo >> 2) & 0x3) = %d\n", ((nand->cellinfo >> 2) & 0x3));
+		//printf("(1024 << (tmp & 3)) = %d", (1024 << (tmp & 3)));
 		if (((nand->cellinfo >> 2) & 0x3) == 0) {
 			nand_type = S3C_NAND_TYPE_SLC;
 			nand->ecc.size = 512;
