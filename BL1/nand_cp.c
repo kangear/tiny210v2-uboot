@@ -447,7 +447,7 @@ int copy_uboot_to_ram_nand (void)
 	NAND_ENABLE_CE();
 	NFCMD_REG = NAND_CMD_READID;
 	NFADDR_REG =  0x00;
-	printf("NAND: ");
+	debug("NAND: ");
 	/* wait for a while */
 	for (i=0; i<200; i++);
 	for (i=0; i<4; i++)
