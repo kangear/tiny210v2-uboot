@@ -1,3 +1,72 @@
+##2013-8-25 Support Boot Kernel from NandFlash(MLC)
+###
+		step1: setenv machid 0xd8a
+		step2: tftp uImage_308
+		step3: nand erase 400000 500000
+		step4: nand write 21000000 400000 500000
+		step5: bootm 
+说明: 
+> 
+ - 0xd8a是tiny210v2内核用的机器码
+> 
+ - uImage_308是友善光盘中的3.08内核make uImage得来的
+###
+		[Ver130726-TINY210v2]# tftp uImage_308
+		dm9000 i/o: 0x88001000, id: 0x90000a46 
+		DM9000: running in 16 bit mode
+		MAC: 00:40:5c:26:0a:5b
+		operating at 100M full duplex mode
+		Using dm9000 device
+		TFTP from server 192.168.1.229; our IP address is 192.168.1.230
+		Filename 'uImage_308'.
+		Load address: 0x21000000
+		Loading: #################################################################
+			     #################################################################
+			     #################################################################
+			     #################################################################
+			     #################################################################
+			     ###
+		done
+		Bytes transferred = 4811624 (496b68 hex)
+		[Ver130726-TINY210v2]# nand erase 400000 500000
+	
+		NAND erase: device 0 offset 0x400000, size 0x500000
+		Erasing at 0x800000 -- 100% complete.
+		OK
+		[Ver130726-TINY210v2]# nand write 21000000 400000 500000
+	
+		NAND write: device 0 offset 0x400000, size 0x500000
+		 5242880 bytes written: OK
+		[Ver130726-TINY210v2]# bootm
+		## Booting kernel from Legacy Image at 21000000 ...
+		   Image Name:   Linux-3.0.8-FriendlyARM
+		   Image Type:   ARM Linux Kernel Image (uncompressed)
+		   Data Size:    4811560 Bytes = 4.6 MiB
+		   Load Address: 20008000
+		   Entry Point:  20008000
+		   Verifying Checksum ... OK
+		   Loading Kernel Image ... OK
+		OK
+		Using machid 0xd8a from environment
+	
+		Starting kernel ...
+	
+		Uncompressing Linux... done, booting the kernel.
+		[    0.000000] Initializing cgroup subsys cpu
+		[    0.000000] Linux version 3.0.8-FriendlyARM (root@kangear) (gcc version 4.5.1 (ctng-1.8.1-FA) ) #1 PREEMPT Fri Jul 26 22:26:05 CST 2013
+		[    0.000000] CPU: ARMv7 Processor [412fc082] revision 2 (ARMv7), cr=10c53c7f
+		[    0.000000] CPU: VIPT nonaliasing data cache, VIPT aliasing instruction cache
+		[    0.000000] Machine: MINI210
+		[    0.000000] MINI210: S70 selected
+		[    0.000000] Memory policy: ECC disabled, Data cache writeback
+		[    0.000000] CPU S5PV210/S5PC110 (id 0x43110220)
+		[    0.000000] S3C24XX Clocks, Copyright 2004 Simtec Electronics
+		[    0.000000] S5PV210: PLL settings, A=1000000000, M=667000000, E=80000000 V=54000000
+		[    0.000000] S5PV210: ARMCLK=1000000000, HCLKM=200000000, HCLKD=166750000
+	
+	
+		2013-08-17 Support NAND: 512MB(SLC) ID:ECDC1095(smart210)
+
 ##2013-08-17 Support NAND: 512MB(SLC) ID:ECDC1095(smart210)
 ###
 		BL1 Ver:1307031
