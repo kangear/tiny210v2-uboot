@@ -1352,7 +1352,7 @@ void s3c_nand_write_page_16bit(struct mtd_info *mtd, struct nand_chip *chip,
 #else
 		chip->oob_poi[j] = ecc_calc[i];
 #endif
-#if 0
+#if 1
 		if((i+1)%26 == 0)
 			j += 2;
 #endif
@@ -1763,15 +1763,15 @@ int board_nand_init(struct nand_chip *nand)
 			nand_type = S3C_NAND_TYPE_MLC;
 #if 1
 			nand->ecc.read_page = s3c_nand_read_page_16bit_tmp;
-			nand->ecc.write_page = s3c_nand_write_page_8bit;
+			nand->ecc.write_page = s3c_nand_write_page_16bit;
 			nand->ecc.read_oob = s3c_nand_read_oob_8bit;
 			nand->ecc.write_oob = s3c_nand_write_oob_8bit;
 			nand->ecc.layout = &s3c_nand_oob_512_8bit;
-			nand->ecc.hwctl = s3c_nand_enable_hwecc_8bit;
-			nand->ecc.calculate = s3c_nand_calculate_ecc_8bit;
-			nand->ecc.correct = s3c_nand_correct_data_8bit;
+			nand->ecc.hwctl = s3c_nand_enable_hwecc_16bit;
+			nand->ecc.calculate = s3c_nand_calculate_ecc_16bit;
+			nand->ecc.correct = s3c_nand_correct_data_16bit;
 			nand->ecc.size = 512;
-			nand->ecc.bytes = 13;
+			nand->ecc.bytes = 26;
 			nand->options |= NAND_NO_SUBPAGE_WRITE;
 #else
 			nand_type = S3C_NAND_TYPE_MLC;
