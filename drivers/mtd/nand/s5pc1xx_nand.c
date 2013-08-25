@@ -765,79 +765,83 @@ void s3c_nand_write_page_8bit(struct mtd_info *mtd, struct nand_chip *chip,
 
 	chip->write_buf(mtd, chip->oob_poi, mtd->oobsize);
 }
-#if 0
-/*
- * 修复Main区的反转位
- */
-int fixEcc(uchar* buf, int num, int flag)
+int s3c_nand_read_page_8bit(struct mtd_info *mtd, struct nand_chip *chip,
+				uint8_t *buf)
 {
-	uint subst[16];
-	uchar pattern[16];
-	int i = 0;
+	u_long nfreg;
+	int i, stat, eccsize = 512;
+	int eccbytes = 13;
+	int eccsteps = mtd->writesize / eccsize;
+	int col = 0;
+	uint8_t *p = buf;
 
-	// 数组赋值为0
-	for(i=0; i<16; i++)
-	{
-		subst[i]=pattern[i]=0;
-	}
-	{
-	subst[0] = (readl(NFECCERL0)>>0) & 0x3ff;
-	pattern[0] = (readl(NFECCERP0)>>0) & 0xff;
-
-	subst[1] = (readl(NFECCERL0)>>16) & 0x3ff;
-	pattern[1] = (readl(NFECCERP0)>>8) & 0xff;
-
-	subst[2] = (readl(NFECCERL1)>>0) & 0x3ff;
-	pattern[2] = (readl(NFECCERP0)>>16) & 0xff;
-
-	subst[3] = (readl(NFECCERL1)>>16) & 0x3ff;
-	pattern[3] = (readl(NFECCERP0)>>24) & 0xff;
-
-	subst[4] = (readl(NFECCERL2)>>0) & 0x3ff;
-	pattern[4] = (readl(NFECCERP1)>>0) & 0xff;
-
-	subst[5] = (readl(NFECCERL2)>>16) & 0x3ff;
-	pattern[5] = (readl(NFECCERP1)>>8) & 0xff;
-
-	subst[6] = (readl(NFECCERL3)>>0) & 0x3ff;
-	pattern[6] = (readl(NFECCERP1)>>16) & 0xff;
-
-	subst[7] = (readl(NFECCERL3)>>16) & 0x3ff;
-	pattern[7] = (readl(NFECCERP1)>>24) & 0xff;
-#if 0
-	subst[8] = (readl(NFECCERL4)>>0) & 0x3ff;
-	pattern[8] = (readl(NFECCERP2)>>0) & 0xff;
-
-	subst[9] = (readl(NFECCERL4)>>16) & 0x3ff;
-	pattern[9] = (readl(NFECCERP2)>>8) & 0xff;
-
-	subst[10] = (readl(NFECCERL5)>>0) & 0x3ff;
-	pattern[10] = (readl(NFECCERP2)>>16) & 0xff;
-
-	subst[11] = (readl(NFECCERL5)>>16) & 0x3ff;
-	pattern[11] = (readl(NFECCERP2)>>24) & 0xff;
-
-	subst[12] = (readl(NFECCERL6)>>0) & 0x3ff;
-	pattern[12] = (readl(NFECCERP3)>>0) & 0xff;
-
-	subst[13] = (readl(NFECCERL6)>>16) & 0x3ff;
-	pattern[13] = (readl(NFECCERP3)>>8) & 0xff;
-
-	subst[14] = (readl(NFECCERL7)>>0) & 0x3ff;
-	pattern[14] = (readl(NFECCERP3)>>16) & 0xff;
-
-	subst[15] = (readl(NFECCERL7)>>16) & 0x3ff;
-	pattern[15] = (readl(NFECCERP3)>>24) & 0xff;
+	/* Step1: read whole oob */
+	col = mtd->writesize;
+#if defined(CONFIG_EVT1)
+	chip->cmdfunc(mtd, NAND_CMD_RNDOUT, col+12, -1);
+#else
+	chip->cmdfunc(mtd, NAND_CMD_RNDOUT, col, -1);
 #endif
-	}
+	chip->read_buf(mtd, chip->oob_poi, mtd->oobsize);
 
-	for(i=0; i<num; i++)
-		buf[subst[i]] ^= pattern[i];
+	col = 0;
+
+	for (i = 0; eccsteps; eccsteps--, i += eccbytes, p += eccsize) {
+
+		chip->cmdfunc(mtd, NAND_CMD_RNDOUT, col, -1);
+		s3c_nand_enable_hwecc_8bit(mtd, NAND_ECC_READ);
+		chip->read_buf(mtd, p, eccsize);
+		chip->write_buf(mtd, chip->oob_poi + (((mtd->writesize / eccsize) - eccsteps) * eccbytes), eccbytes);
+		s3c_nand_calculate_ecc_8bit(mtd, 0, 0);
+		stat = s3c_nand_correct_data_8bit(mtd, p);
+
+		if (stat == -1)
+			mtd->ecc_stats.failed++;
+
+		col = eccsize * ((mtd->writesize / eccsize) + 1 - eccsteps);
+	}
 
 	return 0;
-
 }
-#else
+
+int s3c_nand_read_oob_8bit(struct mtd_info *mtd, struct nand_chip *chip, int page, int sndcmd)
+{
+        int eccbytes = chip->ecc.bytes;
+        int secc_start = mtd->oobsize - eccbytes;
+
+        if (sndcmd) {
+                chip->cmdfunc(mtd, NAND_CMD_READOOB, 0, page);
+                sndcmd = 0;
+        }
+
+        chip->read_buf(mtd, chip->oob_poi, 0); //secc_start);
+        return sndcmd;
+}
+
+int s3c_nand_write_oob_8bit(struct mtd_info *mtd, struct nand_chip *chip, int page)
+{
+        int status = 0;
+        int eccbytes = chip->ecc.bytes;
+        int secc_start = mtd->oobsize - eccbytes;
+
+        chip->cmdfunc(mtd, NAND_CMD_SEQIN, mtd->writesize, page);
+
+        /* spare area */
+        chip->write_buf(mtd, chip->oob_poi, 0); //secc_start);
+
+        /* Send command to program the OOB data */
+        chip->cmdfunc(mtd, NAND_CMD_PAGEPROG, -1, -1);
+        status = chip->waitfunc(mtd, chip);
+        return status & NAND_STATUS_FAIL ? -EIO : 0;
+}
+
+/********************************************************/
+#endif
+
+/***************************************************************
+ * kangear: Temporary 16 Bit H/W ECC supports for BL1 (210 only)
+ ***************************************************************/
+ 
 
 #define NFECCERL0_REG			__REG(ELFIN_NAND_ECC_BASE+NFECCERL0_OFFSET)
 #define NFECCERL1_REG			__REG(ELFIN_NAND_ECC_BASE+NFECCERL1_OFFSET)
@@ -927,7 +931,6 @@ int fixEcc(uchar* buf, int num, int flag)
 
 }
 
-#endif
 /*
  * 读512Byte并进行ECC校验
  */
@@ -1020,49 +1023,9 @@ unsigned char nand_read_512_ecc(unsigned char *buf, struct mtd_info *mtd, struct
 
 	return 0;
 }
-int s3c_nand_read_page_8bit(struct mtd_info *mtd, struct nand_chip *chip,
+int s3c_nand_read_page_16bit_tmp(struct mtd_info *mtd, struct nand_chip *chip,
 				uint8_t *buf)
 {
-/*
-	u_long nfreg;
-	int i, j, stat, eccsize = 512;
-	int eccbytes = 13;
-	int eccsteps = mtd->writesize / eccsize;
-	int col = 0;
-	uint8_t tmp[13];
-	uint8_t *p = buf;
-	uint8_t *t = tmp;
-	
-	// Step1: read whole oob 
-	col = mtd->writesize;
-#if defined(CONFIG_EVT1)
-	chip->cmdfunc(mtd, NAND_CMD_RNDOUT, col+12, -1);
-#else
-	chip->cmdfunc(mtd, NAND_CMD_RNDOUT, col, -1);
-#endif
-	chip->read_buf(mtd, chip->oob_poi, mtd->oobsize);
-
-	col = 0;
-
-	for (i = 0; eccsteps; eccsteps--, i += eccbytes, p += eccsize) {
-
-		chip->cmdfunc(mtd, NAND_CMD_RNDOUT, col, -1);
-		s3c_nand_enable_hwecc_8bit(mtd, NAND_ECC_READ);
-		chip->read_buf(mtd, p, eccsize);
-		//chip->write_buf(mtd, chip->oob_poi + (((mtd->writesize / eccsize) - eccsteps) * eccbytes), eccbytes);
-		chip->read_buf(mtd, t, eccbytes);
-		printf("read ecc code\n");
-		while (!(readl(NFECCSTAT) & (1<<24))){};
-		printf("ECCErrorNo = %d\n", readl(NFECCSECSTAT)&0x1F);
-		s3c_nand_calculate_ecc_8bit(mtd, 0, 0);
-		stat = s3c_nand_correct_data_8bit(mtd, p);
-
-		if (stat == -1)
-			mtd->ecc_stats.failed++;
-
-		col = eccsize * ((mtd->writesize / eccsize) + 1 - eccsteps);
-	}
-*/
 	int i = 0;
 	int page_size = 8192;	
 	int num = page_size/512;
@@ -1072,44 +1035,7 @@ int s3c_nand_read_page_8bit(struct mtd_info *mtd, struct nand_chip *chip,
 	}
 	return 0;
 }
-
-int s3c_nand_read_oob_8bit(struct mtd_info *mtd, struct nand_chip *chip, int page, int sndcmd)
-{
-        int eccbytes = chip->ecc.bytes;
-        int secc_start = mtd->oobsize - eccbytes;
-
-        if (sndcmd) {
-                chip->cmdfunc(mtd, NAND_CMD_READOOB, 0, page);
-                sndcmd = 0;
-        }
-
-        chip->read_buf(mtd, chip->oob_poi, 0); //secc_start);
-        return sndcmd;
-}
-
-int s3c_nand_write_oob_8bit(struct mtd_info *mtd, struct nand_chip *chip, int page)
-{
-        int status = 0;
-        int eccbytes = chip->ecc.bytes;
-        int secc_start = mtd->oobsize - eccbytes;
-
-        chip->cmdfunc(mtd, NAND_CMD_SEQIN, mtd->writesize, page);
-
-        /* spare area */
-        chip->write_buf(mtd, chip->oob_poi, 0); //secc_start);
-
-        /* Send command to program the OOB data */
-        chip->cmdfunc(mtd, NAND_CMD_PAGEPROG, -1, -1);
-        status = chip->waitfunc(mtd, chip);
-        return status & NAND_STATUS_FAIL ? -EIO : 0;
-}
-
-/********************************************************/
-#endif
-
-/***************************************************************
- * kangear: Temporary 16 Bit H/W ECC supports for BL1 (210 only)
- ***************************************************************/
+ 
 static void s3c_nand_wait_ecc_busy_16bit(void)
 {
 	while (readl(NFECCSTAT) & NFESTAT0_ECCBUSY) {
@@ -1836,7 +1762,7 @@ int board_nand_init(struct nand_chip *nand)
 			//printf("That is kangear!\n");
 			nand_type = S3C_NAND_TYPE_MLC;
 #if 1
-			nand->ecc.read_page = s3c_nand_read_page_8bit;
+			nand->ecc.read_page = s3c_nand_read_page_16bit_tmp;
 			nand->ecc.write_page = s3c_nand_write_page_8bit;
 			nand->ecc.read_oob = s3c_nand_read_oob_8bit;
 			nand->ecc.write_oob = s3c_nand_write_oob_8bit;
