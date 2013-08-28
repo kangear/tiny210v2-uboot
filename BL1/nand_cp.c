@@ -272,27 +272,30 @@ uchar nand_read_512_ecc(uchar *buf, unsigned int addr, uchar num)
 	uchar ecctemp[26];
 	uchar ECCErrorNo = 0;
 	int error_flag = 0;
+
+	// 0.清零ECC校验状态寄存器
+	NFECCSTAT_REG |= (1<<24);
 	
-	// 0.初始化16bit_ECC
+	// 1.初始化16bit_ECC
 	NFECCCONF_REG = (511<<16)|(5<<0);
 
-	// 1.复位ECC
+	// 2.复位ECC
 	NF_RSTECC();
 	//NFCONT_REG |= (1<<5);
 	
-	// 2.解锁Main ECC
+	// 3.解锁Main ECC
 	NF_MECC_UnLock();
 	
-	// 3.读521Bbyte	 
+	// 4.读521Bbyte	 
 	nandll_read_512byte(buf, addr, num);
 	
-	// 4.读26byte的ECC校验码
+	// 5.读26byte的ECC校验码
 	nandll_read_16bit_ecc(ecctemp, addr, num);
 	
-	// 5.等待校验完毕
+	// 6.等待校验完毕
 	while (!(NFECCSTAT_REG & NFSTAT_ECCDECDONE)) {};
 
-	// 6.判断校验结果并解决错误
+	// 7.判断校验结果并解决错误
 	ECCErrorNo = NFECCSECSTAT_REG&0x1F;
 	//puthex(ECCErrorNo);putc(' ');
 	
