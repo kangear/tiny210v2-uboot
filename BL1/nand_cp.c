@@ -22,6 +22,7 @@
  * copy完
  * 2013-6-25进行的优化，去掉无关的注释
  * 2013-7-31添加了对page_size为2k的SLC的NandFlash启动支持
+ * 2013-8-28 Optimization BL1 
  */
 
 #include "stdio.h"
@@ -153,14 +154,16 @@ static void nandll_read_n_byte (uchar* buf, ulong addr, ulong add, ulong size)
 	NF_TRANSRnB();
 
 	/* for compatibility(2460). u32 cannot be used. by scsuh */
+
+	NFCMD_REG = NAND_CMD_RNDOUT0;
+
+	NFADDR_REG = (char)((add+i) & 0xff);       // col:A0~A7
+	NFADDR_REG = (char)(((add+i) >> 8) & 0x3f);  // col:A8~A11
+
+	NFCMD_REG = NAND_CMD_RNDOUT1;
+	//thx @fshh520
 	for(i=0; i < size; i++) 
 	{
-		NFCMD_REG = NAND_CMD_RNDOUT0;
-	
-		NFADDR_REG = (char)((add+i) & 0xff);       // col:A0~A7
-		NFADDR_REG = (char)(((add+i) >> 8) & 0x3f);  // col:A8~A11
-		
-		NFCMD_REG = NAND_CMD_RNDOUT1;
 		*buf++ = NFDATA8_REG; 
 		for (j=0; j<1; j++);            
 	}
@@ -188,29 +191,8 @@ static void nandll_read_512byte (uchar *buf, ulong addr, uchar num)
 }
 
 /*
- * 判断一个数组前n项是否为递增
- */
-int isInc(uint* a, int len)
-{
-	if( len > 0 )
-	{
-		if( len == 1 )
-		{
-			return 1;
-		}
-		else
-		{
-			return  (a[len-2] <= a[len-1]) && isInc(a, len - 1);
-		}
-	}
-	else
-	{
-	    return -1;
-	}
-}
-
-/*
  * 修复Main区的反转位
+ * 0x1ff => 0x3ff thx @mhjong
  */
 int fixEcc(uchar* buf, int num, int flag)
 {
@@ -224,58 +206,55 @@ int fixEcc(uchar* buf, int num, int flag)
 		subst[i]=pattern[i]=0;
 	}
 	{
-	subst[0] = (NFECCERL0_REG>>0) & 0x1ff;
+	subst[0] = (NFECCERL0_REG>>0) & 0x3ff;
 	pattern[0] = (NFECCERP0_REG>>0) & 0xff;
 
-	subst[1] = (NFECCERL0_REG>>16) & 0x1ff;
+	subst[1] = (NFECCERL0_REG>>16) & 0x3ff;
 	pattern[1] = (NFECCERP0_REG>>8) & 0xff;
 
-	subst[2] = (NFECCERL1_REG>>0) & 0x1ff;
+	subst[2] = (NFECCERL1_REG>>0) & 0x3ff;
 	pattern[2] = (NFECCERP0_REG>>16) & 0xff;
 
-	subst[3] = (NFECCERL1_REG>>16) & 0x1ff;
+	subst[3] = (NFECCERL1_REG>>16) & 0x3ff;
 	pattern[3] = (NFECCERP0_REG>>24) & 0xff;
 
-	subst[4] = (NFECCERL2_REG>>0) & 0x1ff;
+	subst[4] = (NFECCERL2_REG>>0) & 0x3ff;
 	pattern[4] = (NFECCERP1_REG>>0) & 0xff;
 
-	subst[5] = (NFECCERL2_REG>>16) & 0x1ff;
+	subst[5] = (NFECCERL2_REG>>16) & 0x3ff;
 	pattern[5] = (NFECCERP1_REG>>8) & 0xff;
 
-	subst[6] = (NFECCERL3_REG>>0) & 0x1ff;
+	subst[6] = (NFECCERL3_REG>>0) & 0x3ff;
 	pattern[6] = (NFECCERP1_REG>>16) & 0xff;
 
-	subst[7] = (NFECCERL3_REG>>16) & 0x1ff;
+	subst[7] = (NFECCERL3_REG>>16) & 0x3ff;
 	pattern[7] = (NFECCERP1_REG>>24) & 0xff;
 
-	subst[8] = (NFECCERL4_REG>>0) & 0x1ff;
+	subst[8] = (NFECCERL4_REG>>0) & 0x3ff;
 	pattern[8] = (NFECCERP2_REG>>0) & 0xff;
 
-	subst[9] = (NFECCERL4_REG>>16) & 0x1ff;
+	subst[9] = (NFECCERL4_REG>>16) & 0x3ff;
 	pattern[9] = (NFECCERP2_REG>>8) & 0xff;
 
-	subst[10] = (NFECCERL5_REG>>0) & 0x1ff;
+	subst[10] = (NFECCERL5_REG>>0) & 0x3ff;
 	pattern[10] = (NFECCERP2_REG>>16) & 0xff;
 
-	subst[11] = (NFECCERL5_REG>>16) & 0x1ff;
+	subst[11] = (NFECCERL5_REG>>16) & 0x3ff;
 	pattern[11] = (NFECCERP2_REG>>24) & 0xff;
 
-	subst[12] = (NFECCERL6_REG>>0) & 0x1ff;
+	subst[12] = (NFECCERL6_REG>>0) & 0x3ff;
 	pattern[12] = (NFECCERP3_REG>>0) & 0xff;
 
-	subst[13] = (NFECCERL6_REG>>16) & 0x1ff;
+	subst[13] = (NFECCERL6_REG>>16) & 0x3ff;
 	pattern[13] = (NFECCERP3_REG>>8) & 0xff;
 
-	subst[14] = (NFECCERL7_REG>>0) & 0x1ff;
+	subst[14] = (NFECCERL7_REG>>0) & 0x3ff;
 	pattern[14] = (NFECCERP3_REG>>16) & 0xff;
 
-	subst[15] = (NFECCERL7_REG>>16) & 0x1ff;
+	subst[15] = (NFECCERL7_REG>>16) & 0x3ff;
 	pattern[15] = (NFECCERP3_REG>>24) & 0xff;
 
 	}
-	// 解决最后一个误判断
-	if(!isInc(subst, num))
-		num --;  //如果不是递增说明最后是一个是误判断，所以减少一次修正。
 
 	for(i=0; i<num; i++)
 		buf[subst[i]] ^= pattern[i];
@@ -293,27 +272,30 @@ uchar nand_read_512_ecc(uchar *buf, unsigned int addr, uchar num)
 	uchar ecctemp[26];
 	uchar ECCErrorNo = 0;
 	int error_flag = 0;
+
+	// 0.清零ECC校验状态寄存器
+	NFECCSTAT_REG |= (1<<24);
 	
-	// 0.初始化16bit_ECC
+	// 1.初始化16bit_ECC
 	NFECCCONF_REG = (511<<16)|(5<<0);
 
-	// 1.复位ECC
+	// 2.复位ECC
 	NF_RSTECC();
 	//NFCONT_REG |= (1<<5);
 	
-	// 2.解锁Main ECC
+	// 3.解锁Main ECC
 	NF_MECC_UnLock();
 	
-	// 3.读521Bbyte	 
+	// 4.读521Bbyte	 
 	nandll_read_512byte(buf, addr, num);
 	
-	// 4.读26byte的ECC校验码
+	// 5.读26byte的ECC校验码
 	nandll_read_16bit_ecc(ecctemp, addr, num);
 	
-	// 5.等待校验完毕
+	// 6.等待校验完毕
 	while (!(NFECCSTAT_REG & NFSTAT_ECCDECDONE)) {};
 
-	// 6.判断校验结果并解决错误
+	// 7.判断校验结果并解决错误
 	ECCErrorNo = NFECCSECSTAT_REG&0x1F;
 	//puthex(ECCErrorNo);putc(' ');
 	
