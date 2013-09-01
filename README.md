@@ -10,7 +10,7 @@
 > 
  - rootfs_qtopia_qt4.img是我精简过的yaffs2镜像文件，所以2000000大小要根据镜像大小改变
 > 
- - uImage_softecc是关闭硬件ECC的内核，如何关闭参考这里：
+ - uImage_softecc是关闭硬件ECC的内核，如何关闭参考这里：http://blog.csdn.net/liukun321/article/details/8558425
 
 ###
 		[Ver130726-TINY210v2]# tftp rootfs_qtopia_qt4.img
