@@ -52,6 +52,8 @@
 #include <asm/io.h>
 #include <asm/errno.h>
 
+#define NAND_YAFFS2_DEBUG 
+
 /*
  * CONFIG_SYS_NAND_RESET_CNT is used as a timeout mechanism when resetting
  * a flash.  NAND flash is initialized prior to interrupts so standard timers
@@ -1885,6 +1887,9 @@ static uint8_t *nand_fill_oob(struct nand_chip *chip, uint8_t *oob, size_t len,
 
 	case MTD_OOB_PLACE:
 	case MTD_OOB_RAW:
+#ifdef NAND_YAFFS2_DEBUG 
+		printf("\nlen :%d\n", len);
+#endif
 		memcpy(chip->oob_poi + ops->ooboffs, oob, len);
 		return oob + len;
 
@@ -1998,11 +2003,18 @@ static int nand_do_write_ops(struct mtd_info *mtd, loff_t to,
 		}
 
 		if (unlikely(oob)) {
+#ifdef NAND_YAFFS2_DEBUG 
 			printf("\noob a:%d\n", oob);
+			printf("oobwritelen=%d, oobmaxlen=%d\n", oobwritelen, oobmaxlen);
+#endif
 			size_t len = min(oobwritelen, oobmaxlen);
 			oob = nand_fill_oob(chip, oob, len, ops);
+#ifdef NAND_YAFFS2_DEBUG 
 			printf("\noob b:%d\n", oob);
+#endif
+#ifndef CONFIG_CMD_NAND_YAFFS
 			oobwritelen -= len;
+#endif
 		}
 
 		ret = chip->write_page(mtd, chip, wbuf, page, cached,
@@ -2058,7 +2070,7 @@ static int nand_write(struct mtd_info *mtd, loff_t to, size_t len,
 	size_t oobsize = mtd->oobsize;
 	size_t datasize = mtd->writesize;
 	int i = 0;
-#define NAND_YAFFS2_DEBUG 
+
 #ifdef NAND_YAFFS2_DEBUG
 	int j = 0;
 #endif
