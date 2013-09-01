@@ -52,7 +52,7 @@
 #include <asm/io.h>
 #include <asm/errno.h>
 
-#define NAND_YAFFS2_DEBUG 
+//#define NAND_YAFFS2_DEBUG 
 
 /*
  * CONFIG_SYS_NAND_RESET_CNT is used as a timeout mechanism when resetting
