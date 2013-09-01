@@ -234,6 +234,10 @@ struct mtd_info {
 	 * supposed to be called by MTD users */
 	int (*get_device) (struct mtd_info *mtd);
 	void (*put_device) (struct mtd_info *mtd);
+#if defined(CONFIG_CMD_NAND_YAFFS)
+         u_char rw_oob;
+         u_char skipfirstblk;
+#endif
 };
 
 static inline uint32_t mtd_div_by_eb(uint64_t sz, struct mtd_info *mtd)

@@ -665,18 +665,32 @@ static int do_nand(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 						(u_char *)addr,
 						WITH_DROP_FFS);
 #endif
-#ifdef CONFIG_CMD_NAND_YAFFS
+#if defined(CONFIG_CMD_NAND_YAFFS)&&(!defined(CONFIG_CMD_NAND_YAFFS2))
 		} else if (!strcmp(s, ".yaffs")) {
 			if (read) {
 				printf("Unknown nand command suffix '%s'.\n", s);
 				return 1;
 			}
-#ifndef WITH_INLINE_OOB
-#define WITH_INLINE_OOB WITH_YAFFS_OOB
+#endif
+#if defined(CONFIG_CMD_NAND_YAFFS)&&defined(CONFIG_CMD_NAND_YAFFS2)
+}else if ( s != NULL &&(!strcmp(s, ".yaffs") || !strcmp(s, ".yaffs1"))){
+			if(read)  {
+				  printf("nand read.yaffs[1] is not provide temporarily!"); 
+			    } else    {
+				nand->rw_oob = 1;
+#if defined(CONFIG_CMD_NAND_YAFFS_SKIPFB)
+				nand->skipfirstblk = 1;
+#else
+				nand->skipfirstblk = 0;
 #endif
 			ret = nand_write_skip_bad(nand, off, &rwsize,
-						(u_char *)addr,
-						WITH_INLINE_OOB);
+						(u_char *)addr, WITH_YAFFS_OOB);
+
+#if defined(CONFIG_CMD_NAND_YAFFS_SKIPFB)
+				nand->skipfirstblk = 0;
+#endif
+				nand->rw_oob = 0;   
+			 }
 #endif
 		} else if (!strcmp(s, ".oob")) {
 			/* out-of-band data */
