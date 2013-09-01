@@ -1998,8 +1998,10 @@ static int nand_do_write_ops(struct mtd_info *mtd, loff_t to,
 		}
 
 		if (unlikely(oob)) {
+			printf("\noob a:%d\n", oob);
 			size_t len = min(oobwritelen, oobmaxlen);
 			oob = nand_fill_oob(chip, oob, len, ops);
+			printf("\noob b:%d\n", oob);
 			oobwritelen -= len;
 		}
 
@@ -2050,23 +2052,31 @@ static int nand_write(struct mtd_info *mtd, loff_t to, size_t len,
 #if defined(CONFIG_CMD_NAND_YAFFS)
  /*Thanks for hugerat's code!*/
 
-	 int oldopsmode = 0;
-	 if(mtd->rw_oob==1) {
+	int oldopsmode = 0;
+	if(mtd->rw_oob==1) {
 
 	size_t oobsize = mtd->oobsize;
-	 size_t datasize = mtd->writesize;
-	 int i = 0;
-	 uint8_t oobtemp[oobsize];
-	 int datapages = 0;
+	size_t datasize = mtd->writesize;
+	int i = 0;
+#define NAND_YAFFS2_DEBUG 
+#ifdef NAND_YAFFS2_DEBUG
+	int j = 0;
+#endif
+	uint8_t oobtemp[oobsize];
+	int datapages = 0;
 
-	 datapages = len/(datasize);
-	 for(i=0;i<(datapages);i++) {
-	 memcpy((void *)oobtemp,
-	 (void *)(buf+datasize*(i+1)),oobsize);
-	 memmove((void *)(buf+datasize*(i+1)),(void *)(buf+datasize*(i+1)+oobsize),(datapages-(i+1))*(datasize)+(datapages-1)*oobsize);
-	memcpy((void *)(buf+(datapages)*(datasize+oobsize)-oobsize),(void *)(oobtemp),oobsize);
-        }
- }
+	datapages = len/(datasize);
+	for(i=0;i<(datapages);i++) {
+		memcpy((void *)oobtemp, (void *)(buf+datasize*(i+1)),oobsize);
+		memmove((void *)(buf+datasize*(i+1)),(void *)(buf+datasize*(i+1)+oobsize),(datapages-(i+1))*(datasize)+(datapages-1)*oobsize);
+		memcpy((void *)(buf+(datapages)*(datasize+oobsize)-oobsize),(void *)(oobtemp),oobsize);
+#ifdef NAND_YAFFS2_DEBUG 
+		printf("\noob %d:\n", i);
+		for(j=0; j<(oobsize); j++)
+			printf("%02X ", buf[((datapages)*(datasize+oobsize)-oobsize)+j]);
+#endif
+	}
+}
 #endif
 
 	/* Do not allow writes past end of device */
