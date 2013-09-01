@@ -437,7 +437,8 @@
 #define CONFIG_CMD_NAND
 #if defined(CONFIG_CMD_NAND)
 #define CONFIG_NAND_S5PC1XX 1
-#define CONFIG_CMD_NAND_YAFFS
+#define CONFIG_CMD_NAND_YAFFS 1
+#define CONFIG_CMD_NAND_YAFFS2 1
 #define CONFIG_CMD_MTDPARTS
 #define CONFIG_SYS_MAX_NAND_DEVICE 1
 #define CONFIG_SYS_NAND_BASE           (0xB0E000000)
@@ -446,7 +447,9 @@
 #define NAND_DISABLE_CE()       (NFCONT_REG |= (1 << 1))
 #define NAND_ENABLE_CE()        (NFCONT_REG &= ~(1 << 1))
 #define NF_TRANSRnB()           do { while(!(NFSTAT_REG & (1 << 0))); } while(0)
+/*
 #define CONFIG_CMD_NAND_YAFFS_SKIPFB
+*/
 #define CONFIG_NAND_USE_CHIP_NAME 1
 #undef  CFG_NAND_FLASH_BBT
 #define CFG_NAND_HWECC 1

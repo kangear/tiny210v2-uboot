@@ -1,3 +1,118 @@
+##2013-9-31 Support Yaffs2 for slc NandFlash write
+###
+        step1: tftp rootfs_qtopia_qt4.img 
+        step2: nand erase e00000 2000000
+        step3: nand write.yaffs 21000000 e00000 $filesize
+        step4: setenv machid 0xd8a
+        step5: tftp uImage_softecc
+		step6: bootm
+说明：
+> 
+ - rootfs_qtopia_qt4.img是我精简过的yaffs2镜像文件，所以2000000大小要根据镜像大小改变
+> 
+ - uImage_softecc是关闭硬件ECC的内核，如何关闭参考这里：http://blog.csdn.net/liukun321/article/details/8558425
+
+###
+		[Ver130726-TINY210v2]# tftp rootfs_qtopia_qt4.img
+		dm9000 i/o: 0x88001000, id: 0x90000a46 
+		DM9000: running in 16 bit mode
+		MAC: 00:40:5c:26:0a:5b
+		operating at 100M full duplex mode
+		Using dm9000 device
+		TFTP from server 192.168.1.229; our IP address is 192.168.1.230
+		Filename 'rootfs_qtopia_qt4.img'.
+		Load address: 0x21000000
+		Loading: ####################################################transmission timeout
+		#############
+				 #################################################################
+				 #################################################################
+				 #################################################################
+				 #################################################################
+				 #################################################################
+				 #################################################################
+				 #################################################################
+				 ########################################################transmission timeout
+		#########
+				 #################################################################
+				 #################################################################
+				 #################################################################
+				 #################################################################
+				 ############transmission timeout
+		#####################################################
+				 #################################################################
+				 #################################################################
+				 #################################################################
+				 #################################################################
+				 #################################################################
+				 #################################################################
+				 #################################################################
+				 #################################################################
+				 #################################################################
+				 #################################################################
+				 ############################################
+		done
+		Bytes transferred = 23536128 (1672200 hex)
+		[Ver130726-TINY210v2]# nand erase e00000 2000000
+
+		NAND erase: device 0 offset 0xe00000, size 0x2000000
+		Skipping bad block at  0x00f40000                                          
+		Erasing at 0x2de0000 -- 100% complete.
+		OK
+		[Ver130726-TINY210v2]# nand write.yaffs 21000000 e00000 $filesize
+
+		NAND write: device 0 offset 0xe00000, size 0x1672200
+		Writing at 0xf20000 -- 6% is complete.Skip bad block 0x00f40000
+		Writing at 0x23e0000 -- 100% is complete. 22822912 bytes written: OK
+		[Ver130726-TINY210v2]# 
+				[Ver130726-TINY210v2]# tftp uImage_softecc
+		dm9000 i/o: 0x88001000, id: 0x90000a46 
+		DM9000: running in 16 bit mode
+		MAC: 00:40:5c:26:0a:5b
+		operating at 100M full duplex mode
+		Using dm9000 device
+		TFTP from server 192.168.1.229; our IP address is 192.168.1.230
+		Filename 'uImage_softecc'.
+		Load address: 0x21000000
+		Loading: #################################################################
+				 #################################################################
+				 #################################################################
+				 #################################################################
+				 #################################################################
+				 ###
+		done
+		Bytes transferred = 4809352 (496288 hex)
+		[Ver130726-TINY210v2]# bootm
+		## Booting kernel from Legacy Image at 21000000 ...
+		   Image Name:   Linux-3.0.8-FriendlyARM
+		   Image Type:   ARM Linux Kernel Image (uncompressed)
+		   Data Size:    4809288 Bytes = 4.6 MiB
+		   Load Address: 20008000
+		   Entry Point:  20008000
+		   Verifying Checksum ... OK
+		   Loading Kernel Image ... OK
+		OK
+		Using machid 0xd8a from environment
+
+		Starting kernel ...
+
+		Uncompressing Linux... done, booting the kernel.
+		[    0.000000] Initializing cgroup subsys cpu
+		[    0.000000] Linux version 3.0.8-FriendlyARM (root@kangear) (gcc version 4.5.1 (ctng-1.8.1-FA) ) #2 PREEMPT Sat Aug 17 17:03:05 CST 2013
+		[    0.000000] CPU: ARMv7 Processor [412fc082] revision 2 (ARMv7), cr=10c53c7f
+		[    0.000000] CPU: VIPT nonaliasing data cache, VIPT aliasing instruction cache
+		[    0.000000] Machine: MINI210
+		[    0.000000] Memory policy: ECC disabled, Data cache writeback
+		[    0.000000] CPU S5PV210/S5PC110 (id 0x43110220)  
+		....
+		Please press Enter to activate this console. 
+		[root@FriendlyARM /]# 
+		[root@FriendlyARM /]# ls
+		bin         home        mnt         sbin        usr
+		data        lib         opt         sdcard      var
+		dev         linuxrc     proc        sys         www
+		etc         lost+found  root        tmp
+		[root@FriendlyARM /]# 
+		  
 ##2013-8-25 Support Boot Kernel from NandFlash(MLC)
 ###
 		step1: setenv machid 0xd8a

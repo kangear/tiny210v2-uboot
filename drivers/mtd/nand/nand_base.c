@@ -52,6 +52,8 @@
 #include <asm/io.h>
 #include <asm/errno.h>
 
+//#define NAND_YAFFS2_DEBUG 
+
 /*
  * CONFIG_SYS_NAND_RESET_CNT is used as a timeout mechanism when resetting
  * a flash.  NAND flash is initialized prior to interrupts so standard timers
@@ -1885,6 +1887,9 @@ static uint8_t *nand_fill_oob(struct nand_chip *chip, uint8_t *oob, size_t len,
 
 	case MTD_OOB_PLACE:
 	case MTD_OOB_RAW:
+#ifdef NAND_YAFFS2_DEBUG 
+		printf("\nlen :%d\n", len);
+#endif
 		memcpy(chip->oob_poi + ops->ooboffs, oob, len);
 		return oob + len;
 
@@ -1998,9 +2003,18 @@ static int nand_do_write_ops(struct mtd_info *mtd, loff_t to,
 		}
 
 		if (unlikely(oob)) {
+#ifdef NAND_YAFFS2_DEBUG 
+			printf("\noob a:%d\n", oob);
+			printf("oobwritelen=%d, oobmaxlen=%d\n", oobwritelen, oobmaxlen);
+#endif
 			size_t len = min(oobwritelen, oobmaxlen);
 			oob = nand_fill_oob(chip, oob, len, ops);
+#ifdef NAND_YAFFS2_DEBUG 
+			printf("\noob b:%d\n", oob);
+#endif
+#ifndef CONFIG_CMD_NAND_YAFFS
 			oobwritelen -= len;
+#endif
 		}
 
 		ret = chip->write_page(mtd, chip, wbuf, page, cached,
@@ -2047,6 +2061,36 @@ static int nand_write(struct mtd_info *mtd, loff_t to, size_t len,
 	struct nand_chip *chip = mtd->priv;
 	int ret;
 
+#if defined(CONFIG_CMD_NAND_YAFFS)
+ /*Thanks for hugerat's code!*/
+
+	int oldopsmode = 0;
+	if(mtd->rw_oob==1) {
+
+	size_t oobsize = mtd->oobsize;
+	size_t datasize = mtd->writesize;
+	int i = 0;
+
+#ifdef NAND_YAFFS2_DEBUG
+	int j = 0;
+#endif
+	uint8_t oobtemp[oobsize];
+	int datapages = 0;
+
+	datapages = len/(datasize);
+	for(i=0;i<(datapages);i++) {
+		memcpy((void *)oobtemp, (void *)(buf+datasize*(i+1)),oobsize);
+		memmove((void *)(buf+datasize*(i+1)),(void *)(buf+datasize*(i+1)+oobsize),(datapages-(i+1))*(datasize)+(datapages-1)*oobsize);
+		memcpy((void *)(buf+(datapages)*(datasize+oobsize)-oobsize),(void *)(oobtemp),oobsize);
+#ifdef NAND_YAFFS2_DEBUG 
+		printf("\noob %d:\n", i);
+		for(j=0; j<(oobsize); j++)
+			printf("%02X ", buf[((datapages)*(datasize+oobsize)-oobsize)+j]);
+#endif
+	}
+}
+#endif
+
 	/* Do not allow writes past end of device */
 	if ((to + len) > mtd->size)
 		return -EINVAL;
@@ -2057,13 +2101,32 @@ static int nand_write(struct mtd_info *mtd, loff_t to, size_t len,
 
 	chip->ops.len = len;
 	chip->ops.datbuf = (uint8_t *)buf;
+	//chip->ops.oobbuf = NULL;
+
+#if defined(CONFIG_CMD_NAND_YAFFS)
+	/*Modified by lk*/
+	if(mtd->rw_oob!=1)	{
+	  chip->ops.oobbuf = NULL;
+	} else	{
+	  chip->ops.oobbuf = (uint8_t *)(buf+len); 
+	  chip->ops.ooblen = mtd->oobsize;
+	  oldopsmode = chip->ops.mode;
+	  chip->ops.mode = MTD_OOB_RAW; 
+	}
+#else
 	chip->ops.oobbuf = NULL;
+#endif
 
 	ret = nand_do_write_ops(mtd, to, &chip->ops);
 
 	*retlen = chip->ops.retlen;
 
 	nand_release_device(mtd);
+
+#if defined(CONFIG_CMD_NAND_YAFFS)
+	/*Modified by lk*/
+	chip->ops.mode = oldopsmode; 
+#endif
 
 	return ret;
 }
