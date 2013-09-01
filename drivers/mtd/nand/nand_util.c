@@ -476,7 +476,26 @@ int nand_write_skip_bad(nand_info_t *nand, loff_t offset, size_t *length,
 	u_char *p_buffer = buffer;
 	int need_skip;
 
-#ifdef CONFIG_CMD_NAND_YAFFS
+/*Modified by lk*/
+#if defined(CONFIG_CMD_NAND_YAFFS2)
+	if(nand->rw_oob==1)	{
+		size_t oobsize = nand->oobsize;  
+		size_t datasize = nand->writesize;
+		int datapages = 0;
+
+	   
+		if (((*length)%(nand->oobsize+nand->writesize)) != 0) {
+		    printf ("Attempt to write error length data!\n");
+		    return -EINVAL;
+	    }
+
+		datapages = *length/(datasize+oobsize);
+		*length = datapages*datasize;
+		left_to_write = *length;
+
+	}
+		else 
+#else
 	if (flags & WITH_YAFFS_OOB) {
 		if (flags & ~WITH_YAFFS_OOB)
 			return -EINVAL;
@@ -518,7 +537,8 @@ int nand_write_skip_bad(nand_info_t *nand, loff_t offset, size_t *length,
 		*length = 0;
 		return -EINVAL;
 	}
-
+/*Modified by lk*/
+#if !defined(CONFIG_CMD_NAND_YAFFS2)
 	if (!need_skip && !(flags & WITH_DROP_FFS)) {
 		rval = nand_write(nand, offset, length, buffer);
 		if (rval == 0)
@@ -529,7 +549,7 @@ int nand_write_skip_bad(nand_info_t *nand, loff_t offset, size_t *length,
 			offset, rval);
 		return rval;
 	}
-
+#endif		
 	while (left_to_write > 0) {
 		size_t block_offset = offset & (nand->erasesize - 1);
 		size_t write_size, truncated_write_size;
@@ -542,14 +562,24 @@ int nand_write_skip_bad(nand_info_t *nand, loff_t offset, size_t *length,
 			offset += nand->erasesize - block_offset;
 			continue;
 		}
-
-		if (left_to_write < (blocksize - block_offset))
+/*Modified by lk*/
+#if defined(CONFIG_CMD_NAND_YAFFS)&&defined(CONFIG_CMD_NAND_YAFFS2)
+		if(nand->skipfirstblk==1)	{		
+			nand->skipfirstblk=0;
+			printf ("Skip the first good block %llx\n",
+				offset & ~(nand->erasesize - 1));
+			offset += nand->erasesize - block_offset;
+			continue;
+		}
+#endif
+		if (left_to_write < (nand->erasesize - block_offset))//blocksize
 			write_size = left_to_write;
 		else
-			write_size = blocksize - block_offset;
-
-#ifdef CONFIG_CMD_NAND_YAFFS
+			write_size = nand->erasesize - block_offset;
+/*Modified by lk*/
+#if defined(CONFIG_CMD_NAND_YAFFS)&&(!defined(CONFIG_CMD_NAND_YAFFS2))
 		if (flags & WITH_YAFFS_OOB) {
+
 			int page, pages;
 			size_t pagesize = nand->writesize;
 			size_t pagesize_oob = pagesize + nand->oobsize;
@@ -584,11 +614,14 @@ int nand_write_skip_bad(nand_info_t *nand, loff_t offset, size_t *length,
 				truncated_write_size = drop_ffs(nand, p_buffer,
 						&write_size);
 #endif
-
+			printf("\rWriting at 0x%llx -- ",offset);//Modified by lk	
 			rval = nand_write(nand, offset, &truncated_write_size,
 					p_buffer);
+/*Modified by lk*/
+#if (defined(CONFIG_CMD_NAND_YAFFS)&&(!defined(CONFIG_CMD_NAND_YAFFS2)))
 			offset += write_size;
 			p_buffer += write_size;
+#endif
 		}
 
 		if (rval != 0) {
@@ -597,8 +630,19 @@ int nand_write_skip_bad(nand_info_t *nand, loff_t offset, size_t *length,
 			*length -= left_to_write;
 			return rval;
 		}
-
 		left_to_write -= write_size;
+		printf("%d%% is complete.",100-(left_to_write/(*length/100)));//Modified by lk
+/*Modified by lk*/
+#if (defined(CONFIG_CMD_NAND_YAFFS)&&defined(CONFIG_CMD_NAND_YAFFS2))
+		offset        += write_size;
+		if(nand->rw_oob==1)	{
+			p_buffer += write_size+(write_size/nand->writesize*nand->oobsize);
+		} else	{
+			p_buffer += write_size;
+		}
+#else
+		p_buffer      += write_size;
+#endif
 	}
 
 	return 0;
