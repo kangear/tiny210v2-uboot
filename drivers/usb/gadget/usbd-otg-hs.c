@@ -28,7 +28,11 @@
 #include <asm/errno.h>
 #include <asm/io.h>
 #include <asm/arch/cpu.h>
+#if defined (CONFIG_S5PC110)
+#include "../../../common/dnw.h"
+#else
 #include "../../../common/cpu.h"
+#endif
 #include "usbd-otg-hs.h"
 
 #if defined(CONFIG_S5P6450)
