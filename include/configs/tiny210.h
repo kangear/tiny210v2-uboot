@@ -418,6 +418,40 @@
 /****************************/
 
 
+/* Fastboot variables */
+#define CONFIG_FASTBOOT		1
+#define CFG_FASTBOOT_TRANSFER_BUFFER		(0x40000000)
+#define CFG_FASTBOOT_TRANSFER_BUFFER_SIZE	(0xF000000)   /* 192MB */
+#define CFG_FASTBOOT_ADDR_KERNEL		(0xC0008000)
+#define CFG_FASTBOOT_ADDR_RAMDISK		(0x30800000)
+#define CFG_FASTBOOT_PAGESIZE			(2048)	// Page size of booting device
+#define CFG_FASTBOOT_SDMMC_BLOCKSIZE		(512)	// Block size of sdmmc
+
+/* Just one BSP type should be defined. */
+//#define CFG_FASTBOOT_ONENANDBSP
+#define CFG_FASTBOOT_NANDBSP
+//#define CFG_FASTBOOT_SDMMCBSP
+
+/* LCD setting */
+//#define CFG_LCD_TL2796		// for C110 - narrow LCD
+//#define CFG_LCD_NONAME1			// for V210 - wide LCD
+//#define CFG_LCD_FBUFFER				(0x4f000000)
+
+#define CONFIG_BOOTDELAY	3
+#if defined(CFG_FASTBOOT_NANDBSP)
+
+#ifdef CONFIG_TINY210
+#define CONFIG_BOOTCOMMAND	"nand read C0008000 100000 500000; bootm C0008000"
+#elif defined(CONFIG_ANDROID_FORLINX)
+#define CONFIG_BOOTCOMMAND	"nand read C0008000 600000 500000; bootm C0008000"
+#endif
+
+//#define CONFIG_BOOTCOMMAND "tftp c0008000 zImage;bootm c0008000"
+#elif defined(CFG_FASTBOOT_SDMMCBSP)
+#define CONFIG_BOOTCOMMAND	"movi read kernel C0008000; movi read rootfs 30800000 180000; bootm C0008000 30800000"
+#endif
+
+
 /***Modified by lk ***/
 #define CFG_PHY_UBOOT_BASE	MEMORY_BASE_ADDRESS + 0x3e00000
 #define CFG_PHY_KERNEL_BASE	MEMORY_BASE_ADDRESS + 0x8000
