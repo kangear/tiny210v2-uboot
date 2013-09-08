@@ -38,14 +38,14 @@ fastboot_ptentry ptable_default[] =
         },
         {
             .name     = "kernel",
-            .start    = 0x100000,
+            .start    = 0x400000,
             .length   = 0x500000,
             .flags    = 0
         },
         {
             .name     = "system",
-            .start    = 0x600000,
-            .length   = 0,
+            .start    = 0xe00000,
+            .length   = 0xf200000, //256M-0xe00000 = 242M
             .flags    = FASTBOOT_PTENTRY_FLAGS_WRITE_YAFFS
         },
     

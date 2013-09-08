@@ -79,13 +79,22 @@
 
 #if (CONFIG_FASTBOOT)
 
+#ifdef	CONFIG_FASTBOOT_DEBUG
+#define debug(fmt,args...)	printf (fmt ,##args)
+#define debugX(level,fmt,args...) if (DEBUG>=level) printf(fmt,##args);
+#else
+#define debug(fmt,args...)
+#define debugX(level,fmt,args...)
+#endif	/* DEBUG */
+
 /* Use do_reset for fastboot's 'reboot' command */
 extern int do_reset(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[]);
 /* Use do_fat_fsload for direct image fusing from sd card */
 extern int do_fat_fsload (cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[]);
 /* Use do_setenv and do_saveenv to permenantly save data */
-int do_saveenv (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[]){};
-int do_setenv ( cmd_tbl_t *cmdtp, int flag, int argc, char *argv[]){};
+/*TODO kangear */
+int do_saveenv (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[]){printf("Call do_saveenv\n");};
+int do_setenv ( cmd_tbl_t *cmdtp, int flag, int argc, char *argv[]){printf("do_setenv\n");};
 /* Use do_bootm and do_go for fastboot's 'boot' command */
 extern int do_bootm(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[]);
 int do_go (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[]);
@@ -99,7 +108,7 @@ extern int do_onenand(cmd_tbl_t * cmdtp, int flag, int argc, char *argv[]);
 /* Use do_nand for fastboot's flash commands */
 /*TODO sth*/
 //extern int do_nand(cmd_tbl_t * cmdtp, int flag, int argc, char *argv[]);
-static do_nand(cmd_tbl_t * cmdtp, int flag, int argc, char *argv[]){};
+static do_nand(cmd_tbl_t * cmdtp, int flag, int argc, char *argv[]){printf("Call do_nand\n");};
 #elif defined(CFG_FASTBOOT_SDMMCBSP)
 int do_movi(cmd_tbl_t * cmdtp, int flag, int argc, char *argv[]);
 int do_mmcops(cmd_tbl_t * cmdtp, int flag, int argc, char *argv[]);
@@ -142,6 +151,8 @@ static int static_pcount = -1;
 /* Default partition table (see cpu/.../fastboot.c) */
 extern fastboot_ptentry *ptable_default;
 extern unsigned int ptable_default_size;
+
+static unsigned char cmd_buf[100] = {0};
 
 static void set_env(char *var, char *val)
 {
@@ -516,28 +527,33 @@ static int write_to_ptn(struct fastboot_ptentry *ptn, unsigned int addr, unsigne
 	printf("flashing '%s'\n", ptn->name);
 
 	sprintf(start, "0x%x", ptn->start);
+	printf("ptn->length = %d\n", ptn->length);
 	if (ptn->length == 0)
 	{
-		CFG_FASTBOOT_FLASHCMD(NULL, 0, 3, argv_erase);
+		sprintf(cmd_buf, "nand erase %x ", ptn->start, ptn->length);
+		run_command(cmd_buf, 0);
 	}
 	else
 	{
+		sprintf(cmd_buf, "nand erase %x %x", ptn->start, ptn->length);
+		printf("cmd = %s\n", cmd_buf);
+		run_command(cmd_buf, 0);
 		sprintf(length, "0x%x", ptn->length);
-		CFG_FASTBOOT_FLASHCMD(NULL, 0, 4, argv_erase);
 	}
 
 	/* Which flavor of write to use */
-    if (ptn->flags & FASTBOOT_PTENTRY_FLAGS_WRITE_YAFFS)
+	if (ptn->flags & FASTBOOT_PTENTRY_FLAGS_WRITE_YAFFS)
 	{
-        sprintf(write_type, "write.yaffs2");
+		sprintf(write_type, "write.yaffs");
 		sprintf(wlength, "0x%x", size);
 	}
-    else if(ptn->flags & FASTBOOT_PTENTRY_FLAGS_WRITE_UBOOT) // forlinx add for write.uboot
-    {
-        sprintf(write_type, "write.uboot");
-        sprintf(wlength, "0x%x", size);
-
-    }
+#if 0
+	else if(ptn->flags & FASTBOOT_PTENTRY_FLAGS_WRITE_UBOOT) // forlinx add for write.uboot
+	{
+		sprintf(write_type, "write.uboot");
+		sprintf(wlength, "0x%x", size);
+	}
+#endif
 	else
 	{
 		sprintf(write_type, "write");
@@ -553,8 +569,10 @@ static int write_to_ptn(struct fastboot_ptentry *ptn, unsigned int addr, unsigne
 	sprintf(wbuffer, "0x%x", addr);
 	sprintf(wstart, "0x%x", ptn->start);
 
-
-	ret = CFG_FASTBOOT_FLASHCMD(NULL, 0, 5, argv_write);
+	sprintf(cmd_buf, "nand %s %s %s %s", write_type, argv_write[2], argv_write[3], argv_write[4]);
+	printf("cmd = %s\n", cmd_buf);
+	ret = run_command(cmd_buf, 0);
+	//ret = CFG_FASTBOOT_FLASHCMD(NULL, 0, 5, argv_write);
 
 #if 0
 	if (0 == repeat) {
@@ -829,17 +847,19 @@ static int rx_handler (const unsigned char *buffer, unsigned int buffer_size)
 			int argc_erase = 4;
 			/* do_nand and do_onenand do not check argv[0] */
 			char *argv_erase[5]  = { NULL, "erase",  NULL, NULL, NULL, };
-			
+		
 			argv_erase[2] = start;
 			argv_erase[3] = length;
 
 			sprintf(start, "0x%x", ptn->start);
 			sprintf(length, "0x%x", ptn->length);
-				
+
 			if (ptn->length == 0)
 				argc_erase = 3;
 
-			status = CFG_FASTBOOT_FLASHCMD(NULL, 0, argc_erase, argv_erase);
+			sprintf(cmd_buf, "nand erase 0x%x 0x%x ", ptn->start, ptn->length);
+			status = run_command(cmd_buf, 0);
+			//kangear
 #endif
 
 			if (status)
