@@ -1,465 +1,45 @@
 /*
- * (C) Copyright 2011 Samsung Electronics Co. Ltd
+ * (C) Copyright 2008
+ * Jongpill Lee, Samsung Erectronics, boyko.lee@samsung.com.
+ *      - only support for S5PC110
+ *  $Id: s5pc100.h,v 1.4 2008/11/25 06:15:10 boyko Exp $
  *
- * See file CREDITS for list of people who contributed to this
- * project.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+ * MA 02111-1307 USA
  */
+
+/************************************************
+ * NAME	    : dnw.h
+ *
+ ************************************************/
  
-#ifndef _S5PV310_CPU_H
-#define _S5PV310_CPU_H
+ /* DNW-USB make by nietao email: nietaooldman@126.com */
 
-#ifdef CONFIG_CPU_EXYNOS5210
-#include "cpu_exynos5210.h"
-#elif   CONFIG_CPU_EXYNOS5250
-#include "cpu_exynos5250.h"
-#else
+#ifndef __DNW_H__
+#define __DNW_H__
 
-//#define S5PV310_ADDR_BASE	0xE0000000
-/* S5PV310 */
-#define S5PV310_PRO_ID		0x10000000
-#define S5PV310_SYSREG_BASE	0x10010000
-#define S5PV310_POWER_BASE	0x10020000
-#define S5PV310_CLOCK_BASE	0x10030000
-//#define S5PC100_GPIO_BASE	0xE0300000
-//#define S5PC100_VIC0_BASE	0xE4000000
-//#define S5PC100_VIC1_BASE	0xE4100000
-//#define S5PC100_VIC2_BASE	0xE4200000
-//#define S5PC100_DMC_BASE	0xE6000000
-//#define S5PC100_SROMC_BASE	0xE7000000
-//#define S5PC100_ONENAND_BASE	0xE7100000
-#define S5PV310_HSMMC_BASE	0x12510000
-#define S5PV310_PWMTIMER_BASE	0x139D0000
-//#define S5PC100_WATCHDOG_BASE	0xEA200000
-#define S5PV310_UART_BASE	0x13800000
-//#define S5PC100_MMC_BASE	0xED800000
-
-#define BIT0 				0x00000001
-#define BIT1 				0x00000002
-#define BIT2 				0x00000004
-#define BIT3 				0x00000008
-#define BIT4 				0x00000010
-#define BIT5 				0x00000020
-#define BIT6				0x00000040
-#define BIT7				0x00000080
-#define BIT8				0x00000100
-#define BIT9				0x00000200
-#define BIT10				0x00000400
-#define BIT11				0x00000800
-#define BIT12				0x00001000
-#define BIT13				0x00002000
-#define BIT14				0x00004000
-#define BIT15				0x00008000
-#define BIT16				0x00010000
-#define BIT17				0x00020000
-#define BIT18				0x00040000
-#define BIT19				0x00080000
-#define BIT20				0x00100000
-#define BIT21				0x00200000
-#define BIT22				0x00400000
-#define BIT23				0x00800000
-#define BIT24				0x01000000
-#define BIT25				0x02000000
-#define BIT26				0x04000000
-#define BIT27				0x08000000
-#define BIT28				0x10000000
-#define BIT29				0x20000000
-#define BIT30				0x40000000
-#define BIT31				0x80000000
-
-#define __REG(x)	(*(unsigned int *)(x))
-
-/*
- * CHIP ID
- */
-#define CHIP_ID_BASE		        0x10000000
-
-#define PRO_ID_OFFSET	0x0
-#define PRO_ID		__REG(CHIP_ID_BASE+PRO_ID_OFFSET)
-
-/*
- * SYSREG
- */
-#define GENERAL_CTRL_C2C_OFFSET		0x10C
-#define USB_CFG_OFFSET			0x21C
-#define USB_CFG_REG			(S5PV310_SYSREG_BASE+USB_CFG_OFFSET)
-
-/*
- * POWER
- */
-#define OMR_OFFSET			0x0
-#define SW_RST_REG_OFFSET		0x400
-#define SW_RST_REG			__REG(S5PV310_POWER_BASE+SW_RST_REG_OFFSET)
-
-#define INF_REG_BASE			0x10020800
-
-#define INF_REG0_OFFSET			0x00
-#define INF_REG1_OFFSET			0x04
-#define INF_REG2_OFFSET			0x08
-#define INF_REG3_OFFSET			0x0c
-#define INF_REG4_OFFSET			0x10
-#define INF_REG5_OFFSET			0x14
-#define INF_REG6_OFFSET			0x18
-#define INF_REG7_OFFSET			0x1c
-
-#define C2C_CTRL_OFFSET			0x24
-
-#define INF_REG0_REG			__REG(INF_REG_BASE+INF_REG0_OFFSET)
-#define INF_REG1_REG			__REG(INF_REG_BASE+INF_REG1_OFFSET)
-#define INF_REG2_REG			__REG(INF_REG_BASE+INF_REG2_OFFSET)
-#define INF_REG3_REG			__REG(INF_REG_BASE+INF_REG3_OFFSET)
-#define INF_REG4_REG			__REG(INF_REG_BASE+INF_REG4_OFFSET)
-#define INF_REG5_REG			__REG(INF_REG_BASE+INF_REG5_OFFSET)
-#define INF_REG6_REG			__REG(INF_REG_BASE+INF_REG6_OFFSET)
-#define INF_REG7_REG			__REG(INF_REG_BASE+INF_REG7_OFFSET)
-
-/* Define Mode */
-#define S5P_CHECK_SLEEP			0x00000BAD
-#define S5P_CHECK_DIDLE			0xBAD00000
-#define S5P_CHECK_LPA			0xABAD0000
-
-/*
- * CLOCK
- */
-#define ELFIN_CLOCK_BASE		0x10030000
-
-#define CLK_SRC_LEFTBUS_OFFSET		0x04200
-#define CLK_DIV_LEFTBUS_OFFSET		0x04500
-
-#define CLK_SRC_RIGHTBUS_OFFSET		0x08200
-#define CLK_DIV_RIGHTBUS_OFFSET		0x08500
-
-#define EPLL_LOCK_OFFSET		0x0C010
-#define VPLL_LOCK_OFFSET		0x0C020
-#define EPLL_CON0_OFFSET		0x0C110
-#define EPLL_CON1_OFFSET		0x0C114
-#ifdef CONFIG_SMDKC220
-#define EPLL_CON2_OFFSET		0x0C118
-#endif
-#define VPLL_CON0_OFFSET		0x0C120
-#define VPLL_CON1_OFFSET		0x0C124
-#ifdef CONFIG_SMDKC220
-#define VPLL_CON2_OFFSET		0x0C128
-#endif
-
-#define CLK_SRC_TOP0_OFFSET		0x0C210
-#define CLK_SRC_TOP1_OFFSET		0x0C214
-#define CLK_SRC_FSYS_OFFSET		0x0C240
-#define CLK_SRC_PERIL0_OFFSET		0x0C250
-#define CLK_DIV_TOP_OFFSET		0x0C510
-#define CLK_DIV_FSYS1_OFFSET		0x0C544
-#define CLK_DIV_FSYS2_OFFSET		0x0C548
-#define CLK_DIV_FSYS3_OFFSET		0x0C54C
-#define CLK_DIV_PERIL0_OFFSET		0x0C550
-
-#define CLK_SRC_DMC_OFFSET		0x10200
-#define CLK_DIV_DMC0_OFFSET		0x10500
-#define CLK_DIV_DMC1_OFFSET		0x10504
-
-#define APLL_LOCK_OFFSET		0x14000
-#define MPLL_LOCK_OFFSET		0x14008
-#define APLL_CON0_OFFSET		0x14100
-#define APLL_CON1_OFFSET		0x14104
-#ifdef CONFIG_SMDKC220
-#define MPLL_CON0_OFFSET		0x10108
-#define MPLL_CON1_OFFSET		0x1010C
-#else
-#define MPLL_CON0_OFFSET		0x14108
-#define MPLL_CON1_OFFSET		0x1410C
-#endif
-
-#define CLK_SRC_CPU_OFFSET		0x14200
-#define CLK_DIV_CPU0_OFFSET		0x14500
-#define CLK_DIV_CPU1_OFFSET		0x14504
-
-#define CLK_SRC_FSYS		__REG(ELFIN_CLOCK_BASE+CLK_SRC_FSYS_OFFSET)
-#define CLK_DIV_FSYS1		__REG(ELFIN_CLOCK_BASE+CLK_DIV_FSYS1_OFFSET)
-#define CLK_DIV_FSYS2		__REG(ELFIN_CLOCK_BASE+CLK_DIV_FSYS2_OFFSET)
-#define CLK_DIV_FSYS3		__REG(ELFIN_CLOCK_BASE+CLK_DIV_FSYS3_OFFSET)
-#define APLL_CON0_REG		__REG(ELFIN_CLOCK_BASE+APLL_CON0_OFFSET)
-#define MPLL_CON0_REG		__REG(ELFIN_CLOCK_BASE+MPLL_CON0_OFFSET)
-#define EPLL_CON0_REG		__REG(ELFIN_CLOCK_BASE+EPLL_CON0_OFFSET)
-#define VPLL_CON0_REG		__REG(ELFIN_CLOCK_BASE+VPLL_CON0_OFFSET)
-
-#define USB_PHY_CONTROL_OFFSET		0x0704
-#define USB_PHY_CONTROL            (0x10020000+USB_PHY_CONTROL_OFFSET)//(ELFIN_CLOCK_POWER_BASE+USB_PHY_CONTROL_OFFSET)
-
-/*
- * TZPC
- */
-#define ELFIN_TZPC0_BASE		0x10110000
-#define ELFIN_TZPC1_BASE		0x10120000
-#define ELFIN_TZPC2_BASE		0x10130000
-#define ELFIN_TZPC3_BASE		0x10140000
-#define ELFIN_TZPC4_BASE		0x10150000
-#define ELFIN_TZPC5_BASE		0x10160000
-
-#define TZPC_DECPROT0SET_OFFSET		0x804
-#define TZPC_DECPROT1SET_OFFSET		0x810
-#define TZPC_DECPROT2SET_OFFSET		0x81C
-#define TZPC_DECPROT3SET_OFFSET		0x828
-
-/*
- * Memory controller
- */
-#define ELFIN_SROM_BASE			0x12570000
-
-#define SROM_BW_REG			__REG(ELFIN_SROM_BASE+0x0)
-#define SROM_BC0_REG			__REG(ELFIN_SROM_BASE+0x4)
-#define SROM_BC1_REG			__REG(ELFIN_SROM_BASE+0x8)
-#define SROM_BC2_REG			__REG(ELFIN_SROM_BASE+0xC)
-#define SROM_BC3_REG			__REG(ELFIN_SROM_BASE+0x10)
-#define SROM_BC4_REG			__REG(ELFIN_SROM_BASE+0x14)
-#define SROM_BC5_REG			__REG(ELFIN_SROM_BASE+0x18)
-
-/*
- * SDRAM Controller
- */
-#ifdef CONFIG_SMDKC220
-#define APB_DMC_0_BASE			0x10600000 
-#define APB_DMC_1_BASE			0x10610000 
-#else
-#define APB_DMC_0_BASE			0x10400000 
-#define APB_DMC_1_BASE			0x10410000
-#endif
-
-#define DMC_CONCONTROL 			0x00
-#define DMC_MEMCONTROL 			0x04
-#define DMC_MEMCONFIG0 			0x08
-#define DMC_MEMCONFIG1 			0x0C
-#define DMC_DIRECTCMD 			0x10
-#define DMC_PRECHCONFIG 		0x14
-#define DMC_PHYCONTROL0 		0x18
-#define DMC_PHYCONTROL1 		0x1C
-#define DMC_PHYCONTROL2 		0x20
-#define DMC_PWRDNCONFIG 		0x28
-#define DMC_TIMINGAREF 			0x30
-#define DMC_TIMINGROW 			0x34
-#define DMC_TIMINGDATA 			0x38
-#define DMC_TIMINGPOWER 		0x3C
-#define DMC_PHYSTATUS 			0x40
-#define DMC_PHYZQCONTROL 		0x44
-#define DMC_CHIP0STATUS 		0x48
-#define DMC_CHIP1STATUS 		0x4C
-#define DMC_AREFSTATUS 			0x50
-#define DMC_MRSTATUS 			0x54
-#define DMC_PHYTEST0 			0x58
-#define DMC_PHYTEST1 			0x5C
-#define DMC_QOSCONTROL0 		0x60
-#define DMC_QOSCONFIG0 			0x64
-#define DMC_QOSCONTROL1 		0x68
-#define DMC_QOSCONFIG1 			0x6C
-#define DMC_QOSCONTROL2 		0x70
-#define DMC_QOSCONFIG2 			0x74
-#define DMC_QOSCONTROL3 		0x78
-#define DMC_QOSCONFIG3 			0x7C
-#define DMC_QOSCONTROL4 		0x80
-#define DMC_QOSCONFIG4 			0x84
-#define DMC_QOSCONTROL5 		0x88
-#define DMC_QOSCONFIG5 			0x8C
-#define DMC_QOSCONTROL6 		0x90
-#define DMC_QOSCONFIG6 			0x94
-#define DMC_QOSCONTROL7 		0x98
-#define DMC_QOSCONFIG7 			0x9C
-#define DMC_QOSCONTROL8 		0xA0
-#define DMC_QOSCONFIG8 			0xA4
-#define DMC_QOSCONTROL9 		0xA8
-#define DMC_QOSCONFIG9 			0xAC
-#define DMC_QOSCONTROL10 		0xB0
-#define DMC_QOSCONFIG10 		0xB4
-#define DMC_QOSCONTROL11 		0xB8
-#define DMC_QOSCONFIG11 		0xBC
-#define DMC_QOSCONTROL12 		0xC0
-#define DMC_QOSCONFIG12 		0xC4
-#define DMC_QOSCONTROL13 		0xC8
-#define DMC_QOSCONFIG13 		0xCC
-#define DMC_QOSCONTROL14 		0xD0
-#define DMC_QOSCONFIG14 		0xD4
-#define DMC_QOSCONTROL15 		0xD8
-#define DMC_QOSCONFIG15 		0xDC
-#ifdef CONFIG_SMDKC220
-#define DMC_IVCONTROL	 		0xF0
-#endif
-
-/*
- * MIU
- */
-#define MIU_BASE 			0x10600000 
-#define MIU_INTLV_CONFIG		0x400
-#define MIU_INTLV_START_ADDR		0x808
-#define MIU_MAPPING_UPDATE  	        0x800
-#define MIU_INTLV_END_ADDR		0x810
-
-#define MIU_SINGLE_MAPPING0_START_ADDR	0x818
-#define MIU_SINGLE_MAPPING0_END_ADDR	0x820
-#define MIU_SINGLE_MAPPING1_START_ADDR	0x828
-#define MIU_SINGLE_MAPPING1_END_ADDR	0x830
-
-/*
- * UART
- */
-
-#define S5PV310_UART0_OFFSET		0x00000
-#define S5PV310_UART1_OFFSET		0x10000
-#define S5PV310_UART2_OFFSET		0x20000
-#define S5PV310_UART3_OFFSET		0x30000
-
-#if defined(CONFIG_SERIAL0)
-#define S5PV310_UART_CONSOLE_BASE (S5PV310_UART_BASE + S5PV310_UART0_OFFSET)
-#elif defined(CONFIG_SERIAL1)
-#define S5PV310_UART_CONSOLE_BASE (S5PV310_UART_BASE + S5PV310_UART1_OFFSET)
-#elif defined(CONFIG_SERIAL2)
-#define S5PV310_UART_CONSOLE_BASE (S5PV310_UART_BASE + S5PV310_UART2_OFFSET)
-#elif defined(CONFIG_SERIAL3)
-#define S5PV310_UART_CONSOLE_BASE (S5PV310_UART_BASE + S5PV310_UART3_OFFSET)
-#else
-#define S5PV310_UART_CONSOLE_BASE (S5PV310_UART_BASE + S5PV310_UART0_OFFSET)
-#endif
-
-#define ULCON_OFFSET			0x00
-#define UCON_OFFSET			0x04
-#define UFCON_OFFSET			0x08
-#define UMCON_OFFSET			0x0C
-#define UTRSTAT_OFFSET			0x10
-#define UERSTAT_OFFSET			0x14
-#define UFSTAT_OFFSET			0x18
-#define UMSTAT_OFFSET			0x1C
-#define UTXH_OFFSET			0x20
-#define URXH_OFFSET			0x24
-#define UBRDIV_OFFSET			0x28
-#define UDIVSLOT_OFFSET			0x2C
-#define UINTP_OFFSET			0x30
-#define UINTSP_OFFSET			0x34
-#define UINTM_OFFSET			0x38
-//#define UTRSTAT_TX_EMPTY		BIT2
-//#define UTRSTAT_RX_READY		BIT0
-#define UART_ERR_MASK			0xF
-
-/*
- * HS MMC
- */
-#define ELFIN_HSMMC_0_BASE		0x12510000
-#define ELFIN_HSMMC_1_BASE		0x12520000
-#define ELFIN_HSMMC_2_BASE		0x12530000
-#define ELFIN_HSMMC_3_BASE		0x12540000
-#define ELFIN_HSMMC_4_BASE		0x12550000
-
-#define HM_SYSAD			(0x00)
-#define HM_BLKSIZE			(0x04)
-#define HM_BLKCNT			(0x06)
-#define HM_ARGUMENT			(0x08)
-#define HM_TRNMOD			(0x0c)
-#define HM_CMDREG			(0x0e)
-#define HM_RSPREG0			(0x10)
-#define HM_RSPREG1			(0x14)
-#define HM_RSPREG2			(0x18)
-#define HM_RSPREG3			(0x1c)
-#define HM_BDATA			(0x20)
-#define HM_PRNSTS			(0x24)
-#define HM_HOSTCTL			(0x28)
-#define HM_PWRCON			(0x29)
-#define HM_BLKGAP			(0x2a)
-#define HM_WAKCON			(0x2b)
-#define HM_CLKCON			(0x2c)
-#define HM_TIMEOUTCON			(0x2e)
-#define HM_SWRST			(0x2f)
-#define HM_NORINTSTS			(0x30)
-#define HM_ERRINTSTS			(0x32)
-#define HM_NORINTSTSEN			(0x34)
-#define HM_ERRINTSTSEN			(0x36)
-#define HM_NORINTSIGEN			(0x38)
-#define HM_ERRINTSIGEN			(0x3a)
-#define HM_ACMD12ERRSTS			(0x3c)
-#define HM_CAPAREG			(0x40)
-#define HM_MAXCURR			(0x48)
-#define HM_CONTROL2			(0x80)
-#define HM_CONTROL3			(0x84)
-#define HM_CONTROL4			(0x8c)
-#define HM_HCVER			(0xfe)
-
-/* USBD 2.0 SFR */
-#if defined (CONFIG_S5PC110) 
-#define USBOTG_LINK_BASE		(0xEC000000)
-#define USBOTG_PHY_BASE			(0xEC100000)
-#else
-#define USBOTG_LINK_BASE                (0x12480000) //(0xEC000000)
-#define USBOTG_PHY_BASE                 (0x125B0000) //(0xEC100000)
-#endif
-
-/* PENDING BIT */
-#define BIT_EINT0			(0x1)
-#define BIT_EINT1			(0x1<<1)
-#define BIT_EINT2			(0x1<<2)
-#define BIT_EINT3			(0x1<<3)
-#define BIT_EINT4_7			(0x1<<4)
-#define BIT_EINT8_23			(0x1<<5)
-#define BIT_BAT_FLT			(0x1<<7)
-#define BIT_TICK			(0x1<<8)
-#define BIT_WDT				(0x1<<9)
-#define BIT_TIMER0			(0x1<<10)
-#define BIT_TIMER1			(0x1<<11)
-#define BIT_TIMER2			(0x1<<12)
-#define BIT_TIMER3			(0x1<<13)
-#define BIT_TIMER4			(0x1<<14)
-#define BIT_UART2			(0x1<<15)
-#define BIT_LCD				(0x1<<16)
-#define BIT_DMA0			(0x1<<17)
-#define BIT_DMA1			(0x1<<18)
-#define BIT_DMA2			(0x1<<19)
-#define BIT_DMA3			(0x1<<20)
-#define BIT_SDI				(0x1<<21)
-#define BIT_SPI0			(0x1<<22)
-#define BIT_UART1			(0x1<<23)
-#define BIT_USBH			(0x1<<26)
-#define BIT_IIC				(0x1<<27)
-#define BIT_UART0			(0x1<<28)
-#define BIT_SPI1			(0x1<<29)
-#define BIT_RTC				(0x1<<30)
-#define BIT_ADC				(0x1<<31)
-#define BIT_ALLMSK			(0xFFFFFFFF)
-
-#ifndef __ASSEMBLY__
-#include <asm/io.h>
-/* CPU detection macros */
-//extern unsigned int s5p_cpu_id;
-
-//static inline void s5p_set_cpu_id(void)
-//{
-//	s5p_cpu_id = readl(S5PC100_PRO_ID);
-//	s5p_cpu_id = 0xC000 | ((s5p_cpu_id & 0x00FFF000) >> 12);
-//}
-
-//#define IS_SAMSUNG_TYPE(type, id)			\
-//static inline int cpu_is_##type(void)			\
-//{							\
-//	return s5p_cpu_id == id ? 1 : 0;		\
-//}
-
-//IS_SAMSUNG_TYPE(s5pc100, 0xc100)
-//IS_SAMSUNG_TYPE(s5pc110, 0xc110)
-
-/*#define SAMSUNG_BASE(device, base)				\
-static inline unsigned int samsung_get_base_##device(void)	\
-{								\
-		return S5PV310_##base;				\
-}
-*/
-//SAMSUNG_BASE(clock, CLOCK_BASE)
-//SAMSUNG_BASE(gpio, GPIO_BASE)
-//SAMSUNG_BASE(pro_id, PRO_ID)
-//SAMSUNG_BASE(mmc, MMC_BASE)
-//SAMSUNG_BASE(sromc, SROMC_BASE)
-//SAMSUNG_BASE(timer, PWMTIMER_BASE)
-//SAMSUNG_BASE(uart, UART_CONSOLE_BASE)
-#endif
-#endif  /* !CONFIG_EXYNOS5210 */
 /*
  * USB2.0 HS OTG (Chapter 26)
  */
+#define USBOTG_LINK_BASE		(0xEC000000)
+#define USBOTG_PHY_BASE			(0xEC100000)
+
+#define ELFIN_CLOCK_POWER_BASE		0xE0100000
+#define USB_PHY_CONTROL_OFFSET		0xe80c
+
+#define USB_PHY_CONTROL			(ELFIN_CLOCK_POWER_BASE+USB_PHY_CONTROL_OFFSET)
 
 #define S5P_OTG_PHYPWR	 		(USBOTG_PHY_BASE + 0x000) /* R/W OTG PHY Power Control Register */
 #define S5P_OTG_PHYCLK 			(USBOTG_PHY_BASE + 0x004) /* R/W OTG PHY Clock Control Register */
@@ -761,13 +341,6 @@ static inline unsigned int samsung_get_base_##device(void)	\
 /* Endpoint FIFO address */
 #define S5P_OTG_EP0_FIFO		(USBOTG_LINK_BASE + 0x1000)
 
-/* USB Global Interrupt Status register(GINTSTS) setting value */
-#define GINTSTS_WkUpInt		(1<<31)
-#define GINTSTS_OEPInt		(1<<19)
-#define GINTSTS_IEPInt		(1<<18)
-#define GINTSTS_EnumDone	(1<<13)
-#define GINTSTS_USBRst		(1<<12)
-#define GINTSTS_USBSusp		(1<<11)
-#define GINTSTS_RXFLvl		(1<<4)
 
-#endif	/* _S5PV310_CPU_H */
+
+#endif /*__S5PC210_H__*/

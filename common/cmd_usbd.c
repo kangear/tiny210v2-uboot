@@ -49,7 +49,7 @@
 #include "../cpu/s3c64xx/usbd-otg-hs.h"
 #elif defined(CONFIG_S5PC100)
 #include "../cpu/s5pc1xx/usbd-otg-hs.h"
-#elif defined(CONFIG_S5PC210) || defined(CONFIG_EXYNOS4)
+#elif defined(CONFIG_S5PC210) || defined(CONFIG_EXYNOS4) || defined(CONFIG_S5PC110)
 #include "../drivers/usb/gadget/usbd-otg-hs.h"
 #elif defined(CONFIG_S5P6440)
 #include "../cpu/s5p64xx/usbd-otg-hs.h"
@@ -107,10 +107,12 @@ int do_usbd_dnw(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 		if (s3c_receive_done)
 			break;
 
+#ifndef CONFIG_TINY210
 		if (serial_tstc()) {
 			serial_getc();
 			break;
 		}
+#endif /* CONFIG_TINY210 */
 	}
 
 	/* when operation is done, usbd must be stopped */

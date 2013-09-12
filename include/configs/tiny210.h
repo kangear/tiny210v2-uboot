@@ -457,4 +457,9 @@
 #define CONFIG_NAND_BL1_8BIT_ECC 1
 #endif
 
+/*for dnw*/
+#define CONFIG_S3C_USBD
+
+#define USBD_DOWN_ADDR		0x21000000
+
 #endif	/* __CONFIG_H */
