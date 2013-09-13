@@ -1,11 +1,26 @@
-##2013-9-31 Support Yaffs2 for slc NandFlash write
+##2013-9-13 Support DNW and Fastboot
+###
+	#fastboot
+	step1: fastboot # 开发板
+	step2: fastboot flash bootloader tiny210v2-uboot.bin ＃PC
+	step3: fastboot flash kernel /work/tftpboot/uImage_softecc ＃PC
+	step4: fastboot flash system /work/tftpboot/rootfs_qtopia_qt4.img ＃PC
+	step5: nand read 21000000 400000 500000 # 开发板
+	step6: bootm # 开发板
+
+        #dnw  v1.0
+	dnw-linux : https://github.com/changbindu/dnw-linux
+	other : comming soon...	
+
+
+2013-8-31 Support Yaffs2 for slc NandFlash write
 ###
         step1: tftp rootfs_qtopia_qt4.img 
         step2: nand erase e00000 2000000
         step3: nand write.yaffs 21000000 e00000 $filesize
         step4: setenv machid 0xd8a
         step5: tftp uImage_softecc
-		step6: bootm
+	step6: bootm
 说明：
 > 
  - rootfs_qtopia_qt4.img是我精简过的yaffs2镜像文件，所以2000000大小要根据镜像大小改变
