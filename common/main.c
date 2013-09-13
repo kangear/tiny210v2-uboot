@@ -490,6 +490,11 @@ void main_loop (void)
 #endif /* CONFIG_OF_CONTROL */
 
 	debug ("### main_loop: bootcmd=\"%s\"\n", s ? s : "<UNDEFINED>");
+	/*add by kangear*/
+#ifdef CONFIG_FASTBOOT
+	if (fastboot_preboot())
+		run_command("fastboot", 0);
+#endif
 
 	if (bootdelay != -1 && s && !abortboot(bootdelay)) {
 # ifdef CONFIG_AUTOBOOT_KEYED
