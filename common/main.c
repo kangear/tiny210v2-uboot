@@ -52,6 +52,9 @@
 #include <post.h>
 #include <linux/ctype.h>
 #include <menu.h>
+#if defined CONFIG_TINY210
+#include <s5pc110.h>
+#endif
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -495,7 +498,16 @@ void main_loop (void)
 	if (fastboot_preboot())
 		run_command("fastboot", 0);
 #endif
-
+//bs
+	ulong reg=0;
+	reg = (*(volatile u32 *)(INF_REG_BASE + INF_REG3_OFFSET));
+	if (reg == BOOT_MMCSD)
+	{
+#ifdef CONFIG_DNW_MENU_AUTORUN
+/*TODO : 添加sd启动判断 如果是SD卡启动则怎么运行menu*/
+		run_commnand("menu", 0);
+#endif
+	}
 	if (bootdelay != -1 && s && !abortboot(bootdelay)) {
 # ifdef CONFIG_AUTOBOOT_KEYED
 		int prev = disable_ctrlc(1);	/* disable Control C checking */
