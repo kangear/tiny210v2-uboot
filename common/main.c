@@ -492,14 +492,8 @@ void main_loop (void)
 	debug ("### main_loop: bootcmd=\"%s\"\n", s ? s : "<UNDEFINED>");
 	/*add by kangear*/
 #ifdef CONFIG_FASTBOOT
-	printf("fastboot_preboot() = %d\n", fastboot_preboot());
 	if (fastboot_preboot())
-	{
-		printf("run_command(\"fastboot\", 0);");
 		run_command("fastboot", 0);
-	}
-#else
-#error "You no defined CONFIG_FASTBOOT"
 #endif
 
 	if (bootdelay != -1 && s && !abortboot(bootdelay)) {
