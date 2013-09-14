@@ -134,7 +134,7 @@
 #define CONFIG_SYS_LONGHELP             /* undef to save memory */
 #define CONFIG_SYS_HUSH_PARSER          /* use "hush" command parser    */
 #define CONFIG_SYS_PROMPT_HUSH_PS2      "> "
-#define CONFIG_SYS_PROMPT              "[Ver130726-TINY210v2]# "
+#define CONFIG_SYS_PROMPT              "[Ver130913-TINY210v2]# "
 #define CONFIG_SYS_CBSIZE               256     /* Console I/O Buffer Size*/
 #define CONFIG_SYS_PBSIZE               384     /* Print Buffer Size */
 #define CONFIG_SYS_MAXARGS              64      /* max number of command args */
@@ -493,7 +493,9 @@
 
 /*for dnw*/
 #define CONFIG_S3C_USBD
-
 #define USBD_DOWN_ADDR		0x21000000
+#define  CONFIG_CMD_MENU   1
+/*if enable CONFIG_DNW_MENU_AUTORUN , will run cmd "menu" when boot from sd*/
+/*#define CONFIG_DNW_MENU_AUTORUN 1 */
 
 #endif	/* __CONFIG_H */
