@@ -10,7 +10,7 @@
 
         #dnw  v1.0
 	dnw-linux : https://github.com/changbindu/dnw-linux
-	other : comming soon...	
+	other : 如果要实现从SD卡启动时候直接启动DNW菜单，在include/configs/tiny210.h中打开CONFIG_DNW_MENU_AUTORUN宏就可以实现了。这里默认不启动。关于dnw的使用，请参考别处介绍。
 
 
 2013-8-31 Support Yaffs2 for slc NandFlash write
