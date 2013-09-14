@@ -1,4 +1,17 @@
 #include "stdio.h"
+
+//#define DEBUG
+#ifdef  DEBUG  
+#define debug(fmt,args...)  printf (fmt ,##args)  
+#define debugX(level,fmt,args...) if (DEBUG>=level) printf(fmt,##args);  
+#else
+#define debug(fmt,args...)  
+#define debugX(level,fmt,args...) 
+#define puthex(args) 
+#define put32bits(args)
+#endif  /* DEBUG */
+
+
 typedef unsigned int (*copy_sd_mmc_to_mem) (\
 			unsigned int  channel, \
 			unsigned int  start_block, \
@@ -13,8 +26,8 @@ void copy_code_to_dram(void)
 	ch = *(volatile unsigned int *)(0xD0037488);
 	unsigned char channel = 0;
 	
-	printf("\n\rBL1 Ver:1307020\n\r");
-	printf("Start cp \n\r");
+	debug("\n\rBL1 Ver:130913\n\r");
+	debug("Start cp \n\r");
 
 	// 函数指针
 	copy_sd_mmc_to_mem copy_bl2 = (copy_sd_mmc_to_mem) (*(unsigned int *) (0xD0037F98));
@@ -38,7 +51,7 @@ void copy_code_to_dram(void)
 	// CONFIG_SYS_TEXT_BASE:目的,链接地址CONFIG_SYS_TEXT_BASE	
 	ret = copy_bl2(channel, 33, COPY_BL2_SIZE/512,(unsigned int *)CONFIG_SYS_TEXT_BASE, 0);
 
-	printf("Running! \n\r");
+	debug("Running! \n\r");
 	
 	// 跳转到DRAM
 	BL2 = (void *)CONFIG_SYS_TEXT_BASE;
