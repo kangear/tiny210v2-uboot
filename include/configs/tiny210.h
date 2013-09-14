@@ -496,6 +496,6 @@
 #define USBD_DOWN_ADDR		0x21000000
 #define  CONFIG_CMD_MENU   1
 /*if enable CONFIG_DNW_MENU_AUTORUN , will run cmd "menu" when boot from sd*/
-/* #define CONFIG_DNW_MENU_AUTORUN 1 */
+/*#define CONFIG_DNW_MENU_AUTORUN 1 */
 
 #endif	/* __CONFIG_H */

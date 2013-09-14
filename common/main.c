@@ -505,7 +505,7 @@ void main_loop (void)
 	{
 #ifdef CONFIG_DNW_MENU_AUTORUN
 /*TODO : 添加sd启动判断 如果是SD卡启动则怎么运行menu*/
-		run_commnand("menu", 0);
+		run_command("menu", 0);
 #endif
 	}
 	if (bootdelay != -1 && s && !abortboot(bootdelay)) {
