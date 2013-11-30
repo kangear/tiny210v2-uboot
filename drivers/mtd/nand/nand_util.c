@@ -579,7 +579,7 @@ int nand_write_skip_bad(nand_info_t *nand, loff_t offset, size_t *length,
 /*Modified by lk*/
 #if defined(CONFIG_CMD_NAND_YAFFS)&&(!defined(CONFIG_CMD_NAND_YAFFS2))
 		if (flags & WITH_YAFFS_OOB) {
-
+		printf("if(flags & WITH_YAFFS_OOB)\n");
 			int page, pages;
 			size_t pagesize = nand->writesize;
 			size_t pagesize_oob = pagesize + nand->oobsize;

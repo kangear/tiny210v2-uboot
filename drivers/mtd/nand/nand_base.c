@@ -1829,10 +1829,11 @@ static void nand_write_page_syndrome(struct mtd_info *mtd,
 static int nand_write_page(struct mtd_info *mtd, struct nand_chip *chip,
 			   const uint8_t *buf, int page, int cached, int raw)
 {
+    printf("hi kangear, i'm in %s\n", __func__);
 	int status;
 
 	chip->cmdfunc(mtd, NAND_CMD_SEQIN, 0x00, page);
-
+    printf("hi kangear, unlikely(raw) = %d\n", unlikely(raw));
 	if (unlikely(raw))
 		chip->ecc.write_page_raw(mtd, chip, buf);
 	else
@@ -1937,6 +1938,7 @@ static uint8_t *nand_fill_oob(struct nand_chip *chip, uint8_t *oob, size_t len,
 static int nand_do_write_ops(struct mtd_info *mtd, loff_t to,
 			     struct mtd_oob_ops *ops)
 {
+    printf("hi kangear, i'm in %s\n", __func__);
 	int chipnr, realpage, page, blockmask, column;
 	struct nand_chip *chip = mtd->priv;
 	uint32_t writelen = ops->len;
@@ -2017,8 +2019,10 @@ static int nand_do_write_ops(struct mtd_info *mtd, loff_t to,
 #endif
 		}
 
+		//ret = chip->write_page(mtd, chip, wbuf, page, cached,
+		//		       (ops->mode == MTD_OOB_RAW));
 		ret = chip->write_page(mtd, chip, wbuf, page, cached,
-				       (ops->mode == MTD_OOB_RAW));
+				       (ops->mode == MTD_OOB_AUTO));
 		if (ret)
 			break;
 
