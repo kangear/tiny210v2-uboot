@@ -475,7 +475,7 @@ int nand_write_skip_bad(nand_info_t *nand, loff_t offset, size_t *length,
 	size_t left_to_write = *length;
 	u_char *p_buffer = buffer;
 	int need_skip;
-
+	printf("hi kangear, i'm in %s\n", __func__);
 /*Modified by lk*/
 #if defined(CONFIG_CMD_NAND_YAFFS2)
 	if(nand->rw_oob==1)	{

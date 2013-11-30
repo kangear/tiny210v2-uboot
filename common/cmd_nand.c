@@ -430,6 +430,7 @@ static int raw_access(nand_info_t *nand, ulong addr, loff_t off, ulong count,
 
 static int do_nand(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 {
+printf("hi kangear, i'm in %s\n", __func__);
 	int i, ret = 0;
 	ulong addr;
 	loff_t off, size;

@@ -1419,7 +1419,7 @@ int s3c_nand_write_oob_8bit(struct mtd_info *mtd, struct nand_chip *chip, int pa
         int status = 0;
         int eccbytes = chip->ecc.bytes;
         int secc_start = mtd->oobsize - eccbytes;
-
+        printf("hi kangear, i'm in %s\n", __FUNCTION__);
         chip->cmdfunc(mtd, NAND_CMD_SEQIN, mtd->writesize, page);
 
         /* spare area */

@@ -2058,6 +2058,7 @@ static int nand_do_write_ops(struct mtd_info *mtd, loff_t to,
 static int nand_write(struct mtd_info *mtd, loff_t to, size_t len,
 			  size_t *retlen, const uint8_t *buf)
 {
+       printf("hi kangear, i'm in %s\n", __func__);
 	struct nand_chip *chip = mtd->priv;
 	int ret;
 
@@ -2142,6 +2143,7 @@ static int nand_write(struct mtd_info *mtd, loff_t to, size_t len,
 static int nand_do_write_oob(struct mtd_info *mtd, loff_t to,
 			     struct mtd_oob_ops *ops)
 {
+       printf("hi kangear, i'm in %s\n", __func__);
 	int chipnr, page, status, len;
 	struct nand_chip *chip = mtd->priv;
 
@@ -2220,6 +2222,7 @@ static int nand_do_write_oob(struct mtd_info *mtd, loff_t to,
 static int nand_write_oob(struct mtd_info *mtd, loff_t to,
 			  struct mtd_oob_ops *ops)
 {
+       printf("hi kangear, i'm in %s\n", __func__);
 	struct nand_chip *chip = mtd->priv;
 	int ret = -ENOTSUPP;
 
