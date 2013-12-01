@@ -1346,7 +1346,7 @@ void s3c_nand_write_page_16bit(struct mtd_info *mtd, struct nand_chip *chip,
 	}
 
 	chip->oob_poi[badoffs] = 0xff;
-	for (i = 0, j = 0; i <= eccbytes * (mtd->writesize / eccsize); i++, j++) {
+	for (i = 0, j = 0; i < eccbytes * (mtd->writesize / eccsize); i++, j++) {
 #if defined(CONFIG_EVT1)
 		chip->oob_poi[j+36] = ecc_calc[i];
 #else

@@ -52,7 +52,7 @@
 #include <asm/io.h>
 #include <asm/errno.h>
 
-//#define NAND_YAFFS2_DEBUG 
+#define NAND_YAFFS2_DEBUG 
 
 /*
  * CONFIG_SYS_NAND_RESET_CNT is used as a timeout mechanism when resetting
@@ -2081,6 +2081,9 @@ static int nand_write(struct mtd_info *mtd, loff_t to, size_t len,
 #endif
 	uint8_t oobtemp[oobsize];
 	int datapages = 0;
+
+	for(i=0; i<oobsize; i++)
+		oobtemp[i] = 0xff;
 
 	datapages = len/(datasize);
 	for(i=0;i<(datapages);i++) {
