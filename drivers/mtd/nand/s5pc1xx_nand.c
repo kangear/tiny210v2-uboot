@@ -823,6 +823,7 @@ int s3c_nand_write_oob_8bit(struct mtd_info *mtd, struct nand_chip *chip, int pa
         int status = 0;
         int eccbytes = chip->ecc.bytes;
         int secc_start = mtd->oobsize - eccbytes;
+		printf("hi kangear, i'm in %s\n", __func__);
 
         chip->cmdfunc(mtd, NAND_CMD_SEQIN, mtd->writesize, page);
 
@@ -1171,6 +1172,135 @@ void s3c_nand_enable_hwecc_16bit(struct mtd_info *mtd, int mode)
 
 }
 
+void s3c_nand_enable_hwecc_16bit_kangear(struct mtd_info *mtd, int mode)
+{
+	u_long nfreg;
+	
+	cur_ecc_mode = mode;
+
+	if(cur_ecc_mode == NAND_ECC_WRITE){
+
+	/* 8 bit selection */
+	nfreg = readl(NFCONF);
+	nfreg &= ~(0x3 << 23);
+	nfreg |= (0x3<< 23);
+	writel(nfreg, NFCONF);
+	
+	/* Set ECC type 8/12/[16bit] */
+	nfreg = readl(NFECCCONF);
+	nfreg &= 0xf;
+	nfreg |= 0x5;
+	writel(nfreg, NFECCCONF);
+
+	/* set 8/12/16bit Ecc direction to Encoding [Encoding]*/
+	nfreg = readl(NFECCCONT);
+	nfreg &= ~(0x1 << 16);
+	nfreg |= (0x1 << 16);
+	writel(nfreg, NFECCCONT);
+
+	/* set 8/12/16bit ECC message length  to msg [32] */
+	nfreg = readl(NFECCCONF);
+	nfreg &= ~((0x3ff<<16));
+	nfreg |= (0x1f << 16);
+	writel(nfreg, NFECCCONF);
+
+	/* write '1' to clear this bit. */
+	/* clear illegal access status bit */
+	nfreg = readl(NFSTAT);
+	nfreg |= (0x1 << 4);
+	nfreg |= (0x1 << 5);
+	writel(nfreg, NFSTAT);
+
+	/* clear 8/12/16bit ecc encode done */
+	nfreg = readl(NFECCSTAT);
+	nfreg |= (0x1 << 25);
+	writel(nfreg, NFECCSTAT);
+
+	nfreg = readl(NFCONT);
+	nfreg &= ~(0x1 << 1);
+	writel(nfreg, NFCONT);
+	
+	/* Initialize & unlock */
+	nfreg = readl(NFCONT);
+	nfreg &= ~NFCONT_MECCLOCK;
+	nfreg |= NFCONT_INITECC;	
+	writel(nfreg, NFCONT);
+
+	/* Reset ECC value. */
+	nfreg = readl(NFECCCONT);
+	nfreg |= (0x1 << 2);
+	writel(nfreg, NFECCCONT);
+	
+	}else{
+
+	/* set 8/12/16bit ECC message length  to msg [512]*/
+	nfreg = readl(NFECCCONF);
+	nfreg &= ~((0x3ff<<16));
+	nfreg |= (0x1ff << 16);
+	writel(nfreg, NFECCCONF);
+	
+	/* set 8/12/16bit Ecc direction to Decoding [Decoding]*/
+	nfreg = readl(NFECCCONT);
+	nfreg &= ~(0x1 << 16);
+	writel(nfreg, NFECCCONT);
+	
+	/* write '1' to clear this bit. */
+	/* clear illegal access status bit */
+	nfreg = readl(NFSTAT);
+	nfreg |= (0x1 << 4);
+	nfreg |= (0x1 << 5);
+	writel(nfreg, NFSTAT);
+
+	/* Lock */
+	nfreg = readl(NFCONT);
+	nfreg |= NFCONT_MECCLOCK;
+	writel(nfreg, NFCONT);
+
+	nfreg = readl(NFCONT);
+	nfreg &= ~(0x1 << 1);
+	writel(nfreg, NFCONT);
+
+	/* clear 8/12/16bit ecc decode done */
+	nfreg = readl(NFECCSTAT);
+	nfreg |= (0x1 << 24);
+	writel(nfreg, NFECCSTAT);
+	
+	/* Initialize & lock */
+	nfreg = readl(NFCONT);
+	nfreg &= ~NFCONT_MECCLOCK;
+	nfreg |= NFCONT_MECCLOCK;
+	writel(nfreg, NFCONT);
+
+	/* write '1' to clear this bit. */
+	nfreg = readl(NFSTAT);
+	nfreg &= ~(1<<4);
+	nfreg |= (1<<4);
+	writel(nfreg, NFSTAT);
+
+	while(!(nfreg &(1<<4))){
+		nfreg = readl(NFSTAT);
+		}
+
+	/* write '1' to clear this bit. */
+	nfreg = readl(NFSTAT);
+	nfreg &= ~(1<<4);
+	nfreg |= (1<<4);
+	writel(nfreg, NFSTAT);
+	
+	/* Initialize & unlock */
+	nfreg = readl(NFCONT);
+	nfreg &= ~NFCONT_MECCLOCK;
+	nfreg |= NFCONT_INITECC;	
+	writel(nfreg, NFCONT);
+
+	/* Reset ECC value. */
+	nfreg = readl(NFECCCONT);
+	nfreg |= (0x1 << 2);
+	writel(nfreg, NFECCCONT);
+	}
+
+}
+
 int s3c_nand_calculate_ecc_16bit(struct mtd_info *mtd, const u_char *dat, u_char *ecc_code)
 {
 	u_long nfcont, nfeccprgecc0, nfeccprgecc1, nfeccprgecc2, nfeccprgecc3, nfeccprgecc4, nfeccprgecc5, nfeccprgecc6;
@@ -1338,14 +1468,30 @@ void s3c_nand_write_page_16bit(struct mtd_info *mtd, struct nand_chip *chip,
 
 	uint8_t *ecc_calc = chip->buffers->ecccalc;
 	uint8_t *p = buf;
+	char tmpbuf[32] = {0};
+	for(i=0; i<32; i++)
+		tmpbuf[i]=0xff;
+	uint8_t *p32 = tmpbuf;
 	
 	for (i = 0; eccsteps; eccsteps--, i += eccbytes, p += eccsize) {
 		s3c_nand_enable_hwecc_16bit(mtd, NAND_ECC_WRITE);
 		chip->write_buf(mtd, p, eccsize);
 		s3c_nand_calculate_ecc_16bit(mtd, p, &ecc_calc[i]);
 	}
-
-	chip->oob_poi[badoffs] = 0xff;
+	printf("ecc_calc first:\n");
+	for(i=0; i<512; i++)
+		printf("%02X ", ecc_calc[i]);
+	printf("end!\n");
+	/* 17th ecc */
+	s3c_nand_enable_hwecc_16bit_kangear(mtd, NAND_ECC_WRITE);
+	chip->write_buf(mtd, p32, 32);
+	s3c_nand_calculate_ecc_16bit(mtd, p32, &ecc_calc[416]);
+	
+	printf("ecc_calc second:\n");
+	for(i=0; i<512; i++)
+		printf("%02X ", ecc_calc[i]);	chip->oob_poi[badoffs] = 0xff;
+	printf("end!\n");	
+	
 	for (i = 0, j = 0; i <= eccbytes * (mtd->writesize / eccsize); i++, j++) {
 #if defined(CONFIG_EVT1)
 		chip->oob_poi[j+36] = ecc_calc[i];
@@ -1402,6 +1548,7 @@ int s3c_nand_read_page_16bit(struct mtd_info *mtd, struct nand_chip *chip,
 #ifdef CONFIG_KANGEAR_16BIT
 int s3c_nand_read_oob_8bit(struct mtd_info *mtd, struct nand_chip *chip, int page, int sndcmd)
 {
+        
         int eccbytes = chip->ecc.bytes;
         int secc_start = mtd->oobsize - eccbytes;
 
@@ -1416,6 +1563,8 @@ int s3c_nand_read_oob_8bit(struct mtd_info *mtd, struct nand_chip *chip, int pag
 
 int s3c_nand_write_oob_8bit(struct mtd_info *mtd, struct nand_chip *chip, int page)
 {
+	printf("hi kangear, i'm in %s\n", __func__);
+
         int status = 0;
         int eccbytes = chip->ecc.bytes;
         int secc_start = mtd->oobsize - eccbytes;
